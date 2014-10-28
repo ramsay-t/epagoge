@@ -1,4 +1,4 @@
-defmodule EZ3Str do
+defmodule Epagoge.EZ3Str do
 	def runZ3Str(statementstring) do
 		z3cmd = Application.get_env(:epagoge, :z3cmd)
 		case Application.get_env(:epagoge, :tmp) do

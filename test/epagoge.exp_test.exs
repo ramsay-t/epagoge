@@ -1,5 +1,6 @@
-defmodule ExpTest do
+defmodule Epagoge.ExpTest do
   use ExUnit.Case
+	alias Epagoge.Exp, as: Exp
 
 	defp bind1 do
 		%{:x1 => "coke", :x2 => "100", :x3 => "1.1"}

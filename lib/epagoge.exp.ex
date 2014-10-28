@@ -1,4 +1,4 @@
-defmodule Exp do
+defmodule Epagoge.Exp do
 
 	# Logic
 	def eval({:eq,l,r},bind) do
