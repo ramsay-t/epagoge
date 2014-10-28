@@ -12,7 +12,9 @@ defmodule Epagoge.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :httpoison],
+		 env: [z3cmd: "/Users/ramsay/Z3-str/Z3-str.py"]
+		]
   end
 
   # Dependencies can be Hex packages:
@@ -25,6 +27,6 @@ defmodule Epagoge.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [{:coverex, "~> 1.0.0", only: :test}]
   end
 end
