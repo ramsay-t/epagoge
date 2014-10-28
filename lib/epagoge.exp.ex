@@ -177,6 +177,12 @@ defmodule Epagoge.Exp do
 	def pp({:concat,l,r}) do
 		tpp(l) <> " <> " <> tpp(r)
 	end
+	def pp({:plus,l,r}) do
+		tpp(l) <> " + " <> tpp(r)
+	end
+	def pp({:minus,l,r}) do
+		tpp(l) <> " - " <> tpp(r)
+	end
 
 	# Trivial pretty print
 	# This is a wrapper function for pp that adds brackets to things that are
