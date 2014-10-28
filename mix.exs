@@ -5,6 +5,7 @@ defmodule Epagoge.Mixfile do
     [app: :epagoge,
      version: "0.0.1",
      elixir: "~> 1.1-dev",
+     test_coverage: [tool: Coverex.Task, log: :error],
      deps: deps]
   end
 
