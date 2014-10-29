@@ -183,6 +183,12 @@ defmodule Epagoge.Exp do
 	def pp({:minus,l,r}) do
 		tpp(l) <> " - " <> tpp(r)
 	end
+	def pp({:times,l,r}) do
+		tpp(l) <> " * " <> tpp(r)
+	end
+	def pp({:divide,l,r}) do
+		tpp(l) <> " / " <> tpp(r)
+	end
 
 	# Trivial pretty print
 	# This is a wrapper function for pp that adds brackets to things that are
