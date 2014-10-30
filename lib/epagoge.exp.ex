@@ -214,7 +214,7 @@ defmodule Epagoge.Exp do
 	def trivial?({:nt,_}) do
 		true
 	end
-	def trivial?(e) do
+	def trivial?(_) do
 		false
 	end
 
