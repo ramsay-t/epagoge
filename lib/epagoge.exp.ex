@@ -20,7 +20,16 @@ defmodule Epagoge.Exp do
 	def eval({:ne,l,r},bind) do
 		eval({:nt,{:eq,l,r}},bind)
 	end
-
+	def eval({:conj,l,r},bind) do
+		{lv,_} = eval(l,bind)
+		{rv,_} = eval(r,bind)
+		{lv and rv,bind}
+	end
+	def eval({:disj,l,r},bind) do
+		{lv,_} = eval(l,bind)
+		{rv,_} = eval(r,bind)
+		{lv or rv,bind}
+	end
 	# Variables and literals
 	def eval({:v,name},bind) do
 		{bind[name],bind}
@@ -111,7 +120,7 @@ defmodule Epagoge.Exp do
 		{ev,_} = eval(e,bind)
 		get_number(ev)
 	end
-	defp get_number(ev) do
+	def get_number(ev) do
 		cond do
 			is_integer(ev) -> ev
 			is_float(ev) -> ev

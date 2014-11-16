@@ -5,6 +5,9 @@ defmodule Epagoge.ExpTest do
 	defp bind1 do
 		%{:x1 => "coke", :x2 => "100", :x3 => "1.1"}
 	end
+	defp bind2 do
+		%{:x => true}
+	end
 
 	test "String equality" do
 		assert Exp.eval({:eq,{:v,:x1},{:lit,"coke"}},bind1) == {true,bind1}
@@ -21,6 +24,15 @@ defmodule Epagoge.ExpTest do
 	test "Logical not" do
 		assert Exp.eval({:nt,{:eq,{:v,:x3},{:lit,1.1}}},bind1) == {false,bind1}
 		assert Exp.eval({:nt,{:eq,{:v,:x3},{:lit,36}}},bind1) == {true,bind1}
+	end
+
+	test "Logical conjunction and disjunction" do
+		assert Exp.eval({:conj,{:eq,{:v,:x},{:lit,true}},{:lit,true}},bind2) == {true,bind2}
+		assert Exp.eval({:conj,{:eq,{:v,:x},{:lit,false}},{:lit,true}},bind2) == {false,bind2}
+		assert Exp.eval({:conj,{:eq,{:v,:x},{:lit,true}},{:lit,false}},bind2) == {false,bind2}
+		assert Exp.eval({:disj,{:eq,{:v,:x},{:lit,true}},{:lit,true}},bind2) == {true,bind2}
+		assert Exp.eval({:disj,{:eq,{:v,:x},{:lit,false}},{:lit,true}},bind2) == {true,bind2}
+		assert Exp.eval({:disj,{:eq,{:v,:x},{:lit,false}},{:lit,false}},bind2) == {false,bind2}
 	end
 
 	test "Ne is just not eq" do
