@@ -198,6 +198,12 @@ defmodule Epagoge.Exp do
 	def pp({:divide,l,r}) do
 		tpp(l) <> " / " <> tpp(r)
 	end
+	def pp({:conj,l,r}) do
+		tpp(l) <> " ^ " <> tpp(r)
+	end
+	def pp({:disj,l,r}) do
+		tpp(l) <> " v " <> tpp(r)
+	end
 
 	# Trivial pretty print
 	# This is a wrapper function for pp that adds brackets to things that are
