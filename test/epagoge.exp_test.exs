@@ -114,4 +114,8 @@ defmodule Epagoge.ExpTest do
 		assert Exp.trivial?({:eq,{:lit,6},{:lit,7}}) == false
 	end
 
+	test "Free variables" do
+		assert Exp.freevars({:conj,{:nt,{:v,:r1}},{:lt,{:v,:r2},{:v,:r3}}}) == [:r1,:r2,:r3]
+	end
+
 end

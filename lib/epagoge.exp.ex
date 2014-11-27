@@ -157,7 +157,7 @@ defmodule Epagoge.Exp do
 		end
 	end
 	def pp({:v,name}) do
-		to_string name		
+		to_string name
 	end
 	def pp({:eq,l,r}) do
 		tpp(l) <> " = " <> tpp(r)
@@ -233,4 +233,18 @@ defmodule Epagoge.Exp do
 		false
 	end
 
+	# Free variables
+	def freevars({:v,name}) do
+		[name]
+	end
+	def freevars({:lit,_}) do
+		[]
+	end
+	def freevars({_,r}) do
+		:lists.usort(freevars(r))
+	end
+	def freevars({_,l,r}) do
+		:lists.usort(freevars(l) ++ freevars(r))
+	end
+	
 end

@@ -221,63 +221,63 @@ apply simp
 apply simp
 by (metis gcp_refl)
 
-fun subsumes_join :: "(string * string) \<Rightarrow> (string * string) \<Rightarrow> (string * string)" where
-"subsumes_join (p1,s1) (p2,s2) = 
+fun match_join :: "(string * string) \<Rightarrow> (string * string) \<Rightarrow> (string * string)" where
+"match_join (p1,s1) (p2,s2) = 
   ((greatest_common_prefix p1 p2),(greatest_common_suffix s1 s2))"
 
-lemma subsumes_join_refl [simp] : "subsumes_join a a = a"
+lemma match_join_refl [simp] : "match_join a a = a"
 apply (induct a)
-by (metis gcp_refl greatest_common_suffix_def rev_rev_ident subsumes_join.simps)
+by (metis gcp_refl greatest_common_suffix_def rev_rev_ident match_join.simps)
 
-lemma subsumes_join_commute [simp] : "subsumes_join a b = subsumes_join b a"
+lemma match_join_commute [simp] : "match_join a b = match_join b a"
 apply (induct a arbitrary: b)
-by (metis fst_conv gcp_commute gcs_commute snd_conv subsumes_join.elims)
+by (metis fst_conv gcp_commute gcs_commute snd_conv match_join.elims)
 
-lemma subsumes_join_top : 
-  "\<forall>a b . ([],[]) \<sqsupseteq> subsumes_join a b"
+lemma match_join_top : 
+  "\<forall>a b . ([],[]) \<sqsupseteq> match_join a b"
 by simp
 
-lemma subsumes_join_top_id :
-  "\<forall>x . subsumes_join x ([],[]) = ([],[])"
+lemma match_join_top_id :
+  "\<forall>x . match_join x ([],[]) = ([],[])"
 apply simp
 by (metis gcp_commute greatest_common_prefix.simps(1))
 
-lemma subsumes_join_left_empty : 
-  "\<forall>x y. \<exists> z. subsumes_join ([],y) x = ([],z)"
+lemma match_join_left_empty : 
+  "\<forall>x y. \<exists> z. match_join ([],y) x = ([],z)"
 apply simp
 by (metis gcp_commute greatest_common_prefix.simps(1))
 
-lemma subsumes_join_right_empty : 
-  "\<forall>x y. \<exists> z. subsumes_join (y,[]) x = (z,[])"
+lemma match_join_right_empty : 
+  "\<forall>x y. \<exists> z. match_join (y,[]) x = (z,[])"
 apply simp
 by (metis gcp_commute greatest_common_prefix.simps(1))
 
-lemma subsumes_join_is_join : 
-  "subsumes_join a b \<sqsupseteq> a
-  \<and> subsumes_join a b \<sqsupseteq> b"
+lemma match_join_is_join : 
+  "match_join a b \<sqsupseteq> a
+  \<and> match_join a b \<sqsupseteq> b"
 apply (rule conjI)
-apply (metis PairE fst_conv gcp_is_prefix gcs_is_suffix snd_conv subsumes.elims(3) subsumes_join.elims)
-by (metis fst_conv gcp_is_prefix gcs_is_suffix snd_conv subsumes.elims(3) subsumes_join.elims surj_pair)
+apply (metis PairE fst_conv gcp_is_prefix gcs_is_suffix snd_conv subsumes.elims(3) match_join.elims)
+by (metis fst_conv gcp_is_prefix gcs_is_suffix snd_conv subsumes.elims(3) match_join.elims surj_pair)
 
-lemma subsumes_join_tran :
+lemma match_join_tran :
   "\<lbrakk>a \<sqsupseteq> (c,cc); b \<sqsupseteq> (d,dd)\<rbrakk> \<Longrightarrow> 
-    subsumes_join a b \<sqsupseteq> (c,cc) 
-    \<and> subsumes_join a b \<sqsupseteq> (d,dd)" 
+    match_join a b \<sqsupseteq> (c,cc) 
+    \<and> match_join a b \<sqsupseteq> (d,dd)" 
 apply (rule conjI)
-apply (metis subsumes_join_is_join subsumes_trans2)
-by (metis subsumes_join_is_join subsumes_trans2)
+apply (metis match_join_is_join subsumes_trans2)
+by (metis match_join_is_join subsumes_trans2)
 
-lemma subsumes_join_antisym :
-  "(subsumes_join a b \<sqsupseteq> subsumes_join c d)
-  \<and> (subsumes_join c d \<sqsupseteq> subsumes_join a b)
-  \<longleftrightarrow> subsumes_join a b = subsumes_join c d"
+lemma match_join_antisym :
+  "(match_join a b \<sqsupseteq> match_join c d)
+  \<and> (match_join c d \<sqsupseteq> match_join a b)
+  \<longleftrightarrow> match_join a b = match_join c d"
 apply auto
 apply (metis subsumes_antisym2)
 apply (metis subsumes_refl2)
 by (metis subsumes_refl2)
 
-theorem subsumes_join_least_upper_bound : 
-  "\<forall>p x y . (p \<sqsupseteq> x \<and> p \<sqsupseteq> y) \<longleftrightarrow> p \<sqsupseteq> subsumes_join x y"
+theorem match_join_least_upper_bound : 
+  "\<forall>p x y . (p \<sqsupseteq> x \<and> p \<sqsupseteq> y) \<longleftrightarrow> p \<sqsupseteq> match_join x y"
 apply auto
 apply (metis gcp_is_greatest_prefix)
 apply (metis gcp_is_greatest_prefix rev_rev_ident suffixeq_to_prefixeq)
