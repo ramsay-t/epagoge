@@ -117,6 +117,7 @@ defmodule Epagoge.ExpTest do
 	test "Free variables" do
 		assert Exp.freevars({:conj,{:nt,{:v,:r1}},{:lt,{:v,:r2},{:v,:r3}}}) == [:r1,:r2,:r3]
 		assert Exp.freevars({:eq, {:v, :i1}, {:lit, "coke"}}) == [:i1]
+		assert Exp.freevars({:assign, :o1, {:lit, "coke"}}) == [:o1]
 	end
 
 end

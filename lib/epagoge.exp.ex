@@ -243,6 +243,9 @@ defmodule Epagoge.Exp do
 	def freevars({_,r}) do
 		:lists.usort(freevars(r))
 	end
+	def freevars({:assign,tgt,r}) do
+		:lists.usort([tgt | freevars(r)])
+	end
 	def freevars({_,l,r}) do
 		:lists.usort(freevars(l) ++ freevars(r))
 	end
