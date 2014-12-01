@@ -1,28 +1,33 @@
 defmodule Epagoge.Subsumption do
-	
 	# Reflexivity
 	def subsumes?(l,r) do
 		if l == r do
 			true
 		else
-			subsumes_case(l,r)
+			if is_list(l) and is_list(r) do
+				# Lists of expressions are treated as conjunction
+				subsumes_case(List.foldr(tl(l),hd(l),fn(e,acc) -> {:conj,e,acc} end),
+										 List.foldr(tl(r),hd(r),fn(e,acc) -> {:conj,e,acc} end))
+			else
+				subsumes_case(l,r)
+			end
 		end
 	end
 
 	# Variable subsumption
-	def subsumes_case({:v,_},{:lit,_}) do
+	defp subsumes_case({:v,_},{:lit,_}) do
 		true
 	end
-	def subsumes_case({:v,lname},{:v,rname}) do
+	defp subsumes_case({:v,lname},{:v,rname}) do
 		lname == rname
 	end
 
-	def subsumes_case({:eq,ll,lr},{:eq,rl,rr}) do
+	defp subsumes_case({:eq,ll,lr},{:eq,rl,rr}) do
 		subsumes_case(ll,rl) and subsumes_case(lr,rr)
 	end
 
   # Match expression subsuption
-	def subsumes_case({:match,lpre,lsuf,lt},{:match,rpre,rsuf,rt}) do
+	defp subsumes_case({:match,lpre,lsuf,lt},{:match,rpre,rsuf,rt}) do
 		if lt != rt do
 			false
 		else
@@ -30,7 +35,16 @@ defmodule Epagoge.Subsumption do
 		end
 	end
 
-	def subsumes_case(_l,_r) do
+	#FIXME: this doesn't feel complete. I can imagine there might be 
+	#       a circumstance where you need both halves to subsume...
+	defp subsumes_case({:conj,l,r},o) do
+		subsumes_case(l,o) or subsumes_case(r,o)
+	end
+	defp subsumes_case(o,{:conj,l,r}) do
+		subsumes_case(o,l) and subsumes_case(o,r)
+	end
+
+	defp subsumes_case(_l,_r) do
 		:io.format("Fell through subsumption: ~p vs ~p~n",[_l,_r])
 		false
 	end
