@@ -1,5 +1,13 @@
 defmodule Epagoge.Subsumption do
 
+	def subsumes?([],r) do
+		# Emptylist can be read as "no restrictions", so it is just 'true' and subsumes everything
+		true
+	end
+	def subsumes?(_,[]) do
+		# Conversley, anything restrictive can't subsume true
+		false
+	end
 	def subsumes?(l,r) do
 		if l == r do
 			# Reflexivity

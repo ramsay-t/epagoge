@@ -37,6 +37,8 @@ defmodule Epagoge.SubsumptionTest do
 
 	test "Subsumption over lists" do
 		assert Subsumption.subsumes?([],[]) == true
+		assert Subsumption.subsumes?([],[{:eq,{:v,:r1},{:v,:r2}}]) == true
+		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[]) == false
 		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:lit,1},{:lit,2}}]) == true
 		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:v,:r1},{:lit,2}}]) == true
 		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:lit,1},{:v,:r2}}]) == true
