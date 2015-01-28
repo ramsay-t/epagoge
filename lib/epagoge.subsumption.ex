@@ -1,7 +1,8 @@
 defmodule Epagoge.Subsumption do
-	# Reflexivity
+
 	def subsumes?(l,r) do
 		if l == r do
+			# Reflexivity
 			true
 		else
 			if is_list(l) and is_list(r) do
