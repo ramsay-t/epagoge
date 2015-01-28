@@ -5,6 +5,9 @@ defmodule Epagoge.Mixfile do
     [app: :epagoge,
      version: "0.0.1",
      elixir: "~> 1.1-dev",
+		 name: "Epagoge",
+		 source_url: "https://github.com/ramsay-t/Epagoge",
+		 homepage_url: "https://github.com/ramsay-t/Epagoge",
      test_coverage: [tool: Coverex.Task, log: :error],
      deps: deps]
   end
@@ -28,6 +31,8 @@ defmodule Epagoge.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:coverex, "~> 1.0.0", only: :test}]
+    [{:coverex, "~> 1.0.0", only: :test},
+		 {:earmark, "~> 0.1", only: :dev},
+		 {:ex_doc, "~> 0.6", only: :dev}]
   end
 end
