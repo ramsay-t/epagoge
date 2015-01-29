@@ -30,6 +30,9 @@ defmodule Epagoge.Subsumption do
 	defp subsumes_case({:v,lname},{:v,rname}) do
 		lname == rname
 	end
+	defp subsumes_case({:lit,l1},{:lit,l2}) do
+		l1 == l2
+	end
 
 	defp subsumes_case({:eq,ll,lr},{:eq,rl,rr}) do
 		subsumes_case(ll,rl) and subsumes_case(lr,rr)
