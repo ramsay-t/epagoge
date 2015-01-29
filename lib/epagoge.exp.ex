@@ -204,6 +204,12 @@ defmodule Epagoge.Exp do
 	def pp({:disj,l,r}) do
 		tpp(l) <> " v " <> tpp(r)
 	end
+	def pp({:match,pre,suf,tgt}) do
+		"match(\"" <> pre <> "\",\"" <> suf <> "\"," <> to_string(tgt) <>")"
+	end
+	def pp({:get,pre,suf,tgt}) do
+		"get(\"" <> pre <> "\",\"" <> suf <> "\"," <> to_string(tgt) <>")"
+	end
 
 	# Trivial pretty print
 	# This is a wrapper function for pp that adds brackets to things that are

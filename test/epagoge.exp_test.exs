@@ -108,6 +108,11 @@ defmodule Epagoge.ExpTest do
 		assert Exp.pp({:concat,{:lit,"Hello,"},{:lit, " World!"}}) == "\"Hello,\" <> \" World!\""
 	end
 
+	test "Pretty print match and get" do
+		assert Exp.pp({:match,"key=",";",:i1}) == "match(\"key=\",\";\",i1)"
+		assert Exp.pp({:get,"key=",";",:i1}) == "get(\"key=\",\";\",i1)" 
+	end
+
 	test "Trivial and non-trivial expressions" do
 		assert Exp.trivial?({:lit,5}) == true
 		assert Exp.trivial?({:v,:r1}) == true
