@@ -2,13 +2,34 @@ defmodule Epagoge.StrTest do
   use ExUnit.Case
 	alias Epagoge.Str, as: Str
 
-#	test "Join two dissimilar strings" do
-#		assert Str.join("coke","pepsi") == {"",""}
-#	end
+	test "Get match for complete but distinct strings" do
+		assert Str.get_match([{"coke","coke"},{"pepsi","pepsi"}]) == {"",""}
+	end
+	test "Get match for incomplete, distinct strings" do
+		assert Str.get_match([{"coke","coke"},{"key=pepsi","pepsi"}]) == nil
+	end
+	test "Get match for pairs with identical pre and suf" do
+		assert Str.get_match([{"key=coke;","coke"},{"key=pepsi;","pepsi"}]) == {"key=",";"}
+	end
+	test "Get match for pairs with identical pre and suf and noise" do
+		assert Str.get_match([{"xxxxxkey=coke;xxxx","coke"},{"yyyyykey=pepsi;yyyy","pepsi"}]) == {"key=",";"}
+	end
+	test "Get match for pairs with identical pre and suf but several pairs" do
+		assert Str.get_match([{"xxxxxkey=coke;xxxx","coke"},
+													{"yyyyykey=pepsi;yyyy","pepsi"},
+													{"pppkeykeykey=co;y=coke;sss","coke"}]) == {"y=",";"}
+	end
 
-#	test "Join two strings with real identifiers" do
-#		assert Str.join("")
-#	end
+	test "GCS" do
+		assert Str.gcs("","") == ""
+		assert Str.gcs("coke","pepsi") == ""
+		assert Str.gcs("coke","bloke") == "oke"
+	end
+	test "GCP" do
+		assert Str.gcp("","") == ""
+		assert Str.gcp("coke","pepsi") == ""
+		assert Str.gcp("coke","coors") == "co"
+	end
 
 	defp s1() do 
 		"coke=ok"
