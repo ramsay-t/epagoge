@@ -172,8 +172,8 @@ defmodule Epagoge.Subsumption do
 	end
 
 	defp subsumes_case(_l,_r) do
-		raise to_string(:io_lib.format("Fell through subsumption: ~p vs ~p~n",[_l,_r]))
-		:io.format("Fell through subsumption: ~p vs ~p~n",[_l,_r])
+		#raise to_string(:io_lib.format("Fell through subsumption: ~p vs ~p~n",[_l,_r]))
+		#:io.format("Fell through subsumption: ~p vs ~p~n",[_l,_r])
 		false
 	end
 end
