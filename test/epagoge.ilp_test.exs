@@ -27,4 +27,28 @@ defmodule Epagoge.ILPTest do
 		assert catch_error(ILP.join({:match,"","",:i1},{:match,"","",:i2})) == %ArgumentError{message: "Unsupported join: {match,<<>>,<<>>,i1} with {match,<<>>,<<>>,i2}"}
 	end
 	
+	test "Simplifying boolean expressions" do
+		assert ILP.simplify([]) == []
+		assert ILP.simplify([{:conj,{:lit,true},{:lit,true}}]) == []
+		assert ILP.simplify([{:conj,{:lit,true},{:eq,{:v,:i1},{:lit,4}}}]) == [{:eq,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify([{:conj,{:eq,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}}]) == [{:eq,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify([{:eq,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}]) == [{:eq,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify({:conj,{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}}) == {:eq,{:v,:i1},{:lit,4}}
+		assert ILP.simplify([{:conj,{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}}]) == [{:ge,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify([{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}]) == [{:ge,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify({:conj,{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i12},{:lit,4}}}) == 
+								 {:conj,{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i12},{:lit,4}}}
+	end
+
+	test "Simplifying stacked conjunctions" do
+		assert ILP.simplify({:conj,{:eq,{:v,:i1},{:lit,4}},{:conj,{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}}}}) == 
+								 {:eq,{:v,:i1},{:lit,4}}
+		assert ILP.simplify([{:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}}]) ==
+								 [{:eq,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify([{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}}]) ==
+								 [{:eq,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify([{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}},{:eq,{:v,:i1},{:lit,4}}]) ==
+								 [{:eq,{:v,:i1},{:lit,4}}]
+	end
+
 end

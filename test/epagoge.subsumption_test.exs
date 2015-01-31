@@ -58,4 +58,26 @@ defmodule Epagoge.SubsumptionTest do
 																]) == true
 	end
 
+	test "Subsumption of numerics" do
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,3}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,5}}) == false
+		assert Subsumption.subsumes?({:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:gt,{:v,:i1},{:lit,3}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:gt,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:gt,{:v,:i1},{:lit,5}}) == false
+		assert Subsumption.subsumes?({:gt,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,3}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,5}}) == true
+		assert Subsumption.subsumes?({:le,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,3}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,5}}) == true
+		assert Subsumption.subsumes?({:lt,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+	end
+
 end

@@ -56,9 +56,87 @@ defmodule Epagoge.Subsumption do
 		subsumes_case(o,l) and subsumes_case(o,r)
 	end
 
+	# Some numerics
+	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:ge,tgt,{:lit,gval}}) do
+		eqval >= gval
+	end
+	defp subsumes_case({:ge,tgt,{:lit,lval}},{:ge,tgt,{:lit,rval}}) do
+		lval <= rval
+	end
+	defp subsumes_case({:ge,_,_},{:eq,_,_}) do
+		false
+	end
+	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:le,tgt,{:lit,lval}}) do
+		eqval <= lval
+	end
+	defp subsumes_case({:le,tgt,{:lit,lval}},{:le,tgt,{:lit,rval}}) do
+		lval >= rval
+	end
+	defp subsumes_case({:le,_,_},{:eq,_,_}) do
+		false
+	end
+	defp subsumes_case({:le,_,_},{:ge,_,_}) do
+		false
+	end
+	defp subsumes_case({:ge,_,_},{:le,_,_}) do
+		false
+	end
+
+	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:gt,tgt,{:lit,lval}}) do
+		eqval > lval
+	end
+	defp subsumes_case({:gt,tgt,{:lit,lval}},{:gt,tgt,{:lit,rval}}) do
+		lval >= rval
+	end
+	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:lt,tgt,{:lit,lval}}) do
+		eqval < lval
+	end
+	defp subsumes_case({:lt,tgt,{:lit,lval}},{:lt,tgt,{:lit,rval}}) do
+		lval >= rval
+	end
+	defp subsumes_case({:lt,_,_},{:eq,_,_}) do
+		false
+	end
+	defp subsumes_case({:gt,_,_},{:eq,_,_}) do
+		false
+	end
+	defp subsumes_case({:lt,_,_},{:gt,_,_}) do
+		false
+	end
+	defp subsumes_case({:gt,_,_},{:lt,_,_}) do
+		false
+	end
+	
+	# Mismatched targets or non-literal values
+	defp subsumes_case({:gt,t1,_},{:gt,t2,_}) do
+		false
+	end
+	defp subsumes_case({:lt,t1,_},{:lt,t2,_}) do
+		false
+	end
+	defp subsumes_case({:ge,t1,_},{:ge,t2,_}) do
+		false
+	end
+	defp subsumes_case({:le,t1,_},{:le,t2,_}) do
+		false
+	end
+
+	defp subsumes_case({:eq,t1,_},{:le,t2,_}) do
+		false
+	end
+	defp subsumes_case({:eq,t1,_},{:lt,t2,_}) do
+		false
+	end
+	defp subsumes_case({:eq,t1,_},{:ge,t2,_}) do
+		false
+	end
+	defp subsumes_case({:eq,t1,_},{:gt,t2,_}) do
+		false
+	end
+
+
 	defp subsumes_case(_l,_r) do
 		:io.format("Fell through subsumption: ~p vs ~p~n",[_l,_r])
 		false
 	end
-
 end
