@@ -132,6 +132,10 @@ defmodule Epagoge.ExpTest do
 	test "Pretty print match and get" do
 		assert Exp.pp({:match,"key=",";",{:v,:i1}}) == "match(\"key=\",\";\",i1)"
 		assert Exp.pp({:get,"key=",";",{:v,:i1}}) == "get(\"key=\",\";\",i1)" 
+
+		assert Exp.pp({:eq,{:v,:i1},{:match,"key=",";",{:v,:i1}}}) == "i1 = match(\"key=\",\";\",i1)"
+		assert Exp.pp({:assign,:r1,{:get,"key=",";",{:v,:i1}}}) == "r1 := get(\"key=\",\";\",i1)" 
+		
 	end
 
 	test "Trivial and non-trivial expressions" do

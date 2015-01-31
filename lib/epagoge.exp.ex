@@ -102,7 +102,7 @@ defmodule Epagoge.Exp do
 	end
 
 	# Match and get
-	def eval({:match,pre,suf,tgt}=e,bind) do
+	def eval({:match,pre,suf,tgt},bind) do
 		{v,_} = eval(tgt,bind)
 		case index_of(v,pre) do
 			nil ->
@@ -149,7 +149,7 @@ defmodule Epagoge.Exp do
 		end
 	end
 
-	defp get_val(v,pi,[]) do
+	defp get_val(_v,_pi,[]) do
 		nil
 	end
 	defp get_val(v,pi,[si | sis]) do
@@ -328,7 +328,13 @@ defmodule Epagoge.Exp do
 	def trivial?({:nt,_}) do
 		true
 	end
-	def trivial?(_) do
+	def trivial?({:match,_,_,_}) do
+		true
+	end
+	def trivial?({:get,_,_,_}) do
+		true
+	end
+	def trivial?(_e) do
 		false
 	end
 

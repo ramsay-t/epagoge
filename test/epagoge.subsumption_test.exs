@@ -111,6 +111,9 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:assign,:r1,{:get,"","",{:v,:i1}}},{:assign,:r1,{:get,"key=",";",{:v,:i1}}}) == true
 		assert Subsumption.subsumes?({:assign,:r1,{:get,"y=",";",{:v,:i1}}},{:assign,:r1,{:get,"key=",";",{:v,:i1}}}) == true
 		assert Subsumption.subsumes?({:assign,:r1,{:get,"key=",";",{:v,:i1}}},{:assign,:r1,{:get,"y=",";",{:v,:i1}}}) == false
+
+		assert Subsumption.subsumes?({:assign,:r1,{:v,:i1}},{:assign,:r1,{:v,:i2}}) == false
+
 	end
 
 
