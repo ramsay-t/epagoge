@@ -39,6 +39,13 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"j","j",{:v,:r1}}) == false
 	end
 
+	test "Matches subsume literals" do
+		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:eq,{:v,:r1},{:lit,"coke"}}) == true
+		assert Subsumption.subsumes?({:match,"o","e",{:v,:r1}},{:eq,{:v,:r1},{:lit,"coke"}}) == true
+		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:eq,{:v,:r1},{:lit,"pepsi"}}) == false
+		assert Subsumption.subsumes?({:match,"ep","s",{:v,:r1}},{:eq,{:v,:r1},{:lit,"pepsi"}}) == true
+	end
+
 	test "Subsumption over lists" do
 		assert Subsumption.subsumes?([],[]) == true
 		assert Subsumption.subsumes?([],[{:eq,{:v,:r1},{:v,:r2}}]) == true

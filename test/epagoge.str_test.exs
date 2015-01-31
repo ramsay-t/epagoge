@@ -24,11 +24,15 @@ defmodule Epagoge.StrTest do
 		assert Str.gcs("","") == ""
 		assert Str.gcs("coke","pepsi") == ""
 		assert Str.gcs("coke","bloke") == "oke"
+		assert Str.gcs("ke","e") == "e"
+		assert Str.gcs("e","ke") == "e"
 	end
 	test "GCP" do
 		assert Str.gcp("","") == ""
 		assert Str.gcp("coke","pepsi") == ""
 		assert Str.gcp("coke","coors") == "co"
+		assert Str.gcp("co","c") == "c"
+		assert Str.gcp("c","co") == "c"
 	end
 
 	defp s1() do 

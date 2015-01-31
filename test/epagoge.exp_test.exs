@@ -95,13 +95,34 @@ defmodule Epagoge.ExpTest do
 	end
 
 	test "String concatenation" do
-		assert Exp.eval({:concat,{:lit,"Hello,"},{:lit, " World!"}},%{}) == {"Hello, World!",%{}}
-		assert Exp.eval({:concat,{:lit,"Hello,"},{:v, :r1}},%{:r1 => " World!"}) == {"Hello, World!",%{:r1 => " World!"}}
-		assert Exp.eval({:concat,{:lit,"Total: "},{:plus,{:v, :r1},{:v, :r2}}},%{:r1 => 4, :r2 => "6"}) == {"Total: 10",%{:r1 => 4, :r2 => "6"}}
+		assert Exp.eval({:concat,{:lit,"Hello,"},{:lit, " World!"}},%{}) == 
+								 {"Hello, World!",%{}}
+		assert Exp.eval({:concat,{:lit,"Hello,"},{:v, :r1}},%{:r1 => " World!"}) == 
+								 {"Hello, World!",%{:r1 => " World!"}}
+		assert Exp.eval({:concat,{:lit,"Total: "},{:plus,{:v, :r1},{:v, :r2}}},%{:r1 => 4, :r2 => "6"}) == 
+								 {"Total: 10",%{:r1 => 4, :r2 => "6"}}
 	end
 
 	test "Concat has no side effects" do
 		assert Exp.eval({:concat,{:lit,"Total: "},{:assign,:r1,{:lit,7}}},%{:r1 => 6}) == {"Total: 7",%{:r1 => 6}}
+	end
+
+	test "Eval match" do
+		assert Exp.eval({:match,"key=",";",{:v,:i1}},
+										%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}) == 
+								 {true,%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}}
+		assert Exp.eval({:match,"co","e",{:v,:i1}},
+										%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}) == 
+								 {false,%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}}
+	end
+
+	test "Eval get" do
+		assert Exp.eval({:get,"key=",";",{:v,:i1}},
+										%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}) == 
+								 {"abc",%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}}
+		assert Exp.eval({:get,"co","e",{:v,:i1}},
+										%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}) == 
+								 {nil,%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}}
 	end
 
 	test "Pretty print concat" do
@@ -109,8 +130,8 @@ defmodule Epagoge.ExpTest do
 	end
 
 	test "Pretty print match and get" do
-		assert Exp.pp({:match,"key=",";",:i1}) == "match(\"key=\",\";\",i1)"
-		assert Exp.pp({:get,"key=",";",:i1}) == "get(\"key=\",\";\",i1)" 
+		assert Exp.pp({:match,"key=",";",{:v,:i1}}) == "match(\"key=\",\";\",i1)"
+		assert Exp.pp({:get,"key=",";",{:v,:i1}}) == "get(\"key=\",\";\",i1)" 
 	end
 
 	test "Trivial and non-trivial expressions" do

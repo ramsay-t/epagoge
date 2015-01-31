@@ -25,9 +25,9 @@ defmodule Epagoge.ILP do
 		end
 	end
 	def join({:eq,{:v,tgt},{:lit,s1}},{:eq,{:v,tgt},{:lit,s2}}) do
-		{:match,Str.gcp(s1,s2),Str.gcs(s1,s2),tgt}
+		{:match,Str.gcp(s1,s2),Str.gcs(s1,s2),{:v,tgt}}
 	end
-	def join({:match,_pre,_suf,tgt}=m,{:eq,{:v,tgt},{:lit,s}}) do
+	def join({:match,_pre,_suf,{:v,tgt}}=m,{:eq,{:v,tgt},{:lit,s}}) do
 		if Exp.eval(m,Map.put(%{},tgt,s)) do
 			m
 		else
@@ -47,7 +47,10 @@ defmodule Epagoge.ILP do
 
   This is not a particularly advanced simplifier - it will convert the expression to CNF and then
   Remove trivial cases (e.g. true ^ P == P) and look for subsumption across conjunction 
-  (e.g. i1 > 7 ^ i1 > 5 == i1 > 5) 
+  (e.g. i1 > 7 ^ i1 > 5 == i1 > 5).
+
+  Also, this does not check for tautologies or falacies, so it won't simplify x > 4 ^ x < 3 to false.
+  It might in the future.
   """
 	def simplify(e) do
 		if is_list(e) do
@@ -62,6 +65,45 @@ defmodule Epagoge.ILP do
 	end
 	def simplify_step({:conj,e,{:lit, true}}) do
 		simplify(e)
+	end
+	def simplify_step({:conj,{:match,_pre,_suf,tgt}=l,r}) do
+		sr = simplify(r)
+		srlist = conj_to_list(sr)
+		if Enum.any?(srlist, fn(sre) -> Subs.subsumes?(sre,l) end) do
+			sr
+		else
+			{newl,filtered} = List.foldl(srlist,
+												{l,[]},
+												fn(sre,{m,acc}) ->
+														case sre do
+															{:eq,tgt,{:lit,_val}} ->
+																if Subs.subsumes?(m,sre) do
+																	{m,acc}
+																else
+																	{m,acc++[sre]}
+																end
+															{:match,_,_,tgt} ->
+																case join(m,sre) do
+																	nil ->
+																		{m,acc++[sre]}
+																	newmatch ->
+																		# Drop the subsumed match from the accumulator
+																		{newmatch,acc}
+																end
+															_ ->
+																{m,acc++[sre]}
+														end
+												end)
+			case newl do
+				{:match,"","",_} ->
+					list_to_conj(filtered)
+				_ ->
+					list_to_conj([newl | filtered])
+			end
+		end
+	end
+	def simplify_step({:conj,l,{:match,pre,suf,tgt}}) do
+		simplify_step({:conj,{:match,pre,suf,tgt},l})
 	end
 	def simplify_step({:conj,l,{:conj,_,_}=r}) do
 		sl = simplify(l)

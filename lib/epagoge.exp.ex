@@ -101,6 +101,99 @@ defmodule Epagoge.Exp do
 		{lv <> rv,bind}
 	end
 
+	# Match and get
+	def eval({:match,pre,suf,tgt}=e,bind) do
+		{v,_} = eval(tgt,bind)
+		case index_of(v,pre) do
+			nil ->
+				{false,bind}
+			pi ->
+				case suf do
+					# Empty means right to the end, so its always true
+					"" ->
+						{true,bind}
+					_ ->
+						# Could be multiple copies of suf...
+						case all_indices(v,suf) do
+							nil ->
+								{false,bind}
+							sis ->
+								if Enum.any?(sis, fn(si) -> si > pi end) do
+									{true,bind}
+								else
+									{false,bind}
+								end
+						end
+				end
+		end
+	end
+
+	def eval({:get,pre,suf,tgt},bind) do
+		{v,_} = eval(tgt,bind)
+		case index_of(v,pre) do
+			nil ->
+				{nil,bind}
+			pi ->
+				case suf do
+					# Empty means right to the end
+					"" ->
+						{String.slice(v,pi,String.length(v)),bind}
+					_ ->
+						case all_indices(v,suf) do
+							nil ->
+								{nil,bind}
+							sis ->
+								{get_val(v,pi+String.length(pre),sis),bind}
+						end
+				end
+		end
+	end
+
+	defp get_val(v,pi,[]) do
+		nil
+	end
+	defp get_val(v,pi,[si | sis]) do
+		if si > pi do
+			String.slice(v,pi,si-pi+1)
+		else
+			get_val(v,pi,sis)
+		end
+	end
+
+	defp all_indicies(_,"") do
+		[0]
+	end
+	defp all_indices(haystack,needle) do
+		case index_of(haystack,needle) do
+			nil -> nil
+			i ->
+				case all_indices(String.slice(haystack,i+String.length(needle),String.length(haystack)),needle) do
+					nil ->
+						[i]
+					is ->
+						# We have to offset the children because we have sliced the string...
+						[i | Enum.map(is, fn(idx) -> idx + i end)]
+				end
+		end
+	end
+
+	defp index_of(_,"") do
+		0
+	end
+	defp index_of(haystack,needle) do
+		index_of_step(haystack,needle,0)
+	end
+	defp index_of_step("",_,_) do
+		nil
+	end
+	defp index_of_step(h,n,i) do
+		if String.starts_with?(h,n) do
+			i
+		else
+			index_of_step(String.slice(h,1,String.length(h)),n,i+1)
+		end
+	end
+	
 	# Helper functions
 	defp make_numbers(l,r,bind) do
 				case make_number(l,bind) do
@@ -205,10 +298,10 @@ defmodule Epagoge.Exp do
 		tpp(l) <> " v " <> tpp(r)
 	end
 	def pp({:match,pre,suf,tgt}) do
-		"match(\"" <> pre <> "\",\"" <> suf <> "\"," <> to_string(tgt) <>")"
+		"match(\"" <> pre <> "\",\"" <> suf <> "\"," <> tpp(tgt) <>")"
 	end
 	def pp({:get,pre,suf,tgt}) do
-		"get(\"" <> pre <> "\",\"" <> suf <> "\"," <> to_string(tgt) <>")"
+		"get(\"" <> pre <> "\",\"" <> suf <> "\"," <> tpp(tgt) <>")"
 	end
 
 	# Trivial pretty print

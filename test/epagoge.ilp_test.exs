@@ -19,12 +19,15 @@ defmodule Epagoge.ILPTest do
 
 	test "String joins" do
 		# No constraint
-		assert ILP.join({:eq,{:v,:i1},{:lit,"coke"}},{:eq,{:v,:i1},{:lit,"pepsi"}}) == {:match,"","",:i1}
-		assert ILP.join({:eq,{:v,:i1},{:lit,"key=coke;"}},{:eq,{:v,:i1},{:lit,"key=pepsi;"}}) == {:match,"key=",";",:i1}
-		assert ILP.join({:match,"key=",";",:i1},{:match,"y=","",:i1}) == {:match,"y=","",:i1}
-		assert ILP.join({:match,"abc","def",:i1},{:match,"xyz","pqr",:i1}) == nil
-		assert ILP.join({:match,"","",:i1},{:match,"","",:i1}) == {:match,"","",:i1}
-		assert catch_error(ILP.join({:match,"","",:i1},{:match,"","",:i2})) == %ArgumentError{message: "Unsupported join: {match,<<>>,<<>>,i1} with {match,<<>>,<<>>,i2}"}
+		assert ILP.join({:eq,{:v,:i1},{:lit,"coke"}},{:eq,{:v,:i1},{:lit,"pepsi"}}) == {:match,"","",{:v,:i1}}
+		assert ILP.join({:eq,{:v,:i1},{:lit,"key=coke;"}},{:eq,{:v,:i1},{:lit,"key=pepsi;"}}) == {:match,"key=",";",{:v,:i1}}
+		assert ILP.join({:match,"key=",";",{:v,:i1}},{:match,"y=","",{:v,:i1}}) == {:match,"y=","",{:v,:i1}}
+		assert ILP.join({:match,"abc","def",{:v,:i1}},{:match,"xyz","pqr",{:v,:i1}}) == nil
+		assert ILP.join({:match,"","",{:v,:i1}},{:match,"","",{:v,:i1}}) == {:match,"","",{:v,:i1}}
+		assert catch_error(ILP.join({:match,"","",{:v,:i1}},{:match,"","",{:v,:i2}})) == %ArgumentError{message: "Unsupported join: {match,<<>>,<<>>,{v,i1}} with {match,<<>>,<<>>,{v,i2}}"}
+
+		assert ILP.join({:match,"cc","e",{:v,:i1}},{:match,"c","ee",{:v,:i1}}) == {:match,"c","e",{:v,:i1}}
+
 	end
 	
 	test "Simplifying boolean expressions" do
@@ -49,6 +52,16 @@ defmodule Epagoge.ILPTest do
 								 [{:eq,{:v,:i1},{:lit,4}}]
 		assert ILP.simplify([{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}},{:eq,{:v,:i1},{:lit,4}}]) ==
 								 [{:eq,{:v,:i1},{:lit,4}}]
+	end
+
+	test "Simplifying matches" do
+		assert ILP.simplify([{:eq,{:v,:i1},{:lit,"coke"}},{:match,"c","e",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
+		assert ILP.simplify([{:match,"","",{:v,:i1}},{:eq,{:v,:i1},{:lit,"coke"}}]) == [] 
+		assert ILP.simplify([{:eq,{:v,:i1},{:lit,"coke"}},{:match,"","",{:v,:i1}}]) == [] 
+		assert ILP.simplify([{:match,"c","e",{:v,:i1}},{:match,"cc","e",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
+		assert ILP.simplify([{:match,"cc","e",{:v,:i1}},{:match,"c","e",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
+		assert ILP.simplify([{:match,"c","ee",{:v,:i1}},{:match,"cc","e",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
+		assert ILP.simplify([{:match,"c","e",{:v,:i1}},{:match,"c","ee",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
 	end
 
 end

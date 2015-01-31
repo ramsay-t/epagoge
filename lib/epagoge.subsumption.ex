@@ -1,6 +1,7 @@
 defmodule Epagoge.Subsumption do
+	alias Epagoge.Exp, as: Exp
 
-	def subsumes?([],r) do
+	def subsumes?([],_r) do
 		# Emptylist can be read as "no restrictions", so it is just 'true' and subsumes everything
 		true
 	end
@@ -45,6 +46,14 @@ defmodule Epagoge.Subsumption do
 		else
 			String.starts_with?(rpre,lpre) and String.ends_with?(rsuf,lsuf)
 		end
+	end
+	defp subsumes_case({:match,_pre,_suf,{:v,tgt}}=l,{:eq,{:v,tgt},{:lit,val}}) do
+		{t,_} = Exp.eval(l,Map.put(%{},tgt,val))
+		t
+	end
+	# Nothing except matching can subsume a match
+	defp subsumes_case(_,{:match,_,_,_}) do
+		false
 	end
 
 	#FIXME: this doesn't feel complete. I can imagine there might be 
@@ -108,29 +117,29 @@ defmodule Epagoge.Subsumption do
 	end
 	
 	# Mismatched targets or non-literal values
-	defp subsumes_case({:gt,t1,_},{:gt,t2,_}) do
+	defp subsumes_case({:gt,_t1,_},{:gt,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:lt,t1,_},{:lt,t2,_}) do
+	defp subsumes_case({:lt,_t1,_},{:lt,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:ge,t1,_},{:ge,t2,_}) do
+	defp subsumes_case({:ge,_t1,_},{:ge,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:le,t1,_},{:le,t2,_}) do
+	defp subsumes_case({:le,_t1,_},{:le,_t2,_}) do
 		false
 	end
 
-	defp subsumes_case({:eq,t1,_},{:le,t2,_}) do
+	defp subsumes_case({:eq,_t1,_},{:le,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:eq,t1,_},{:lt,t2,_}) do
+	defp subsumes_case({:eq,_t1,_},{:lt,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:eq,t1,_},{:ge,t2,_}) do
+	defp subsumes_case({:eq,_t1,_},{:ge,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:eq,t1,_},{:gt,t2,_}) do
+	defp subsumes_case({:eq,_t1,_},{:gt,_t2,_}) do
 		false
 	end
 
