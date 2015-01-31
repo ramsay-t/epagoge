@@ -44,7 +44,7 @@ defmodule Epagoge.Subsumption do
 		if lt != rt do
 			false
 		else
-			String.starts_with?(rpre,lpre) and String.ends_with?(rsuf,lsuf)
+			String.ends_with?(rpre,lpre) and String.starts_with?(rsuf,lsuf)
 		end
 	end
 	defp subsumes_case({:match,_pre,_suf,{:v,tgt}}=l,{:eq,{:v,tgt},{:lit,val}}) do
@@ -53,6 +53,24 @@ defmodule Epagoge.Subsumption do
 	end
 	# Nothing except matching can subsume a match
 	defp subsumes_case(_,{:match,_,_,_}) do
+		false
+	end
+
+	# Get subsumption is identical to match subsumption
+	defp subsumes_case({:get,p1,s1,tgt},{:get,p2,s2,tgt}) do
+		subsumes?({:match,p1,s1,tgt},{:match,p2,s2,tgt})
+	end
+	# Special case - assignment from src is equivilent to get("","",src)
+	defp subsumes_case({:assign,tgt,src},{:assign,tgt,{:get,_,_,src}}) do
+		true
+	end
+	defp subsumes_case({:assign,tgt,{:get,p1,s1,src}},{:assign,tgt,{:get,p2,s2,src}}) do
+		subsumes?({:match,p1,s1,tgt},{:match,p2,s2,tgt})
+	end
+	defp subsumes_case({:assign,_t1,_s1},{:assign,_t2,{:get,_,_,_s2}}) do
+		false
+	end
+	defp subsumes_case({:get,_,_,_},_) do
 		false
 	end
 
@@ -143,8 +161,18 @@ defmodule Epagoge.Subsumption do
 		false
 	end
 
+	# Assignments
+	# The only thing an assignment can subsume is an assignment with a subsumed source expression
+	# and identical target
+	defp subsumes_case({:assign,tgt,src1},{:assign,tgt,src2}) do
+		subsumes?(src1,src2)
+	end
+	defp subsumes_case({:assign,_,_},_) do
+		false
+	end
 
 	defp subsumes_case(_l,_r) do
+		raise to_string(:io_lib.format("Fell through subsumption: ~p vs ~p~n",[_l,_r]))
 		:io.format("Fell through subsumption: ~p vs ~p~n",[_l,_r])
 		false
 	end

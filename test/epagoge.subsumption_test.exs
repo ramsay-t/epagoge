@@ -33,10 +33,12 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:match,"","",{:v,:r1}},{:match,"c","e",{:v,:r1}}) == true
 
 		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"cj","ej",{:v,:r1}}) == false
-		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"cj","je",{:v,:r1}}) == true
-		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"c","ej",{:v,:r1}}) == false
-		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"jc","e",{:v,:r1}}) == false
+		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"jc","ej",{:v,:r1}}) == true
+		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"c","ej",{:v,:r1}}) == true
+		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"jc","e",{:v,:r1}}) == true
 		assert Subsumption.subsumes?({:match,"c","e",{:v,:r1}},{:match,"j","j",{:v,:r1}}) == false
+
+		assert Subsumption.subsumes?({:match,"y=",";",{:v,:r1}},{:match,"key=",";",{:v,:r1}}) == true
 	end
 
 	test "Matches subsume literals" do
@@ -86,5 +88,30 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,5}}) == true
 		assert Subsumption.subsumes?({:lt,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
 	end
+
+	test "Get subsumption" do
+		# This is more extensively tested in assignemts and matches, since get subsumption is
+		# identical to match subsumption and implemented as such
+		assert Subsumption.subsumes?({:get,"","",{:v,:i1}},{:get,"key=",";",{:v,:i1}}) == true
+		assert Subsumption.subsumes?({:get,"","",{:v,:i1}},{:get,"key=",";",{:v,:i2}}) == false
+
+		assert Subsumption.subsumes?({:get,"key=",";",{:v,:i1}},{:get,"key=",";",{:v,:i1}}) == true
+		assert Subsumption.subsumes?({:get,"y=",";",{:v,:i1}},{:get,"key=",";",{:v,:i1}}) == true
+		assert Subsumption.subsumes?({:get,"key=",";",{:v,:i1}},{:get,"y=",";",{:v,:i1}}) == false
+	end
+
+	test "Subsumption over updates/assignments" do
+		assert Subsumption.subsumes?({:assign,:r1,{:v,:i1}},{:assign,:r1,{:v,:i1}}) == true
+
+		assert Subsumption.subsumes?({:assign,:r1,{:v,:i1}},{:assign,:r1,{:get,"","",{:v,:i1}}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:v,:i1}},{:assign,:r1,{:get,"","",{:v,:i2}}}) == false
+		assert Subsumption.subsumes?({:assign,:r2,{:v,:i1}},{:assign,:r1,{:get,"","",{:v,:i1}}}) == false
+
+		assert Subsumption.subsumes?({:assign,:r1,{:v,:i1}},{:assign,:r1,{:get,"key=",";",{:v,:i1}}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:get,"","",{:v,:i1}}},{:assign,:r1,{:get,"key=",";",{:v,:i1}}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:get,"y=",";",{:v,:i1}}},{:assign,:r1,{:get,"key=",";",{:v,:i1}}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:get,"key=",";",{:v,:i1}}},{:assign,:r1,{:get,"y=",";",{:v,:i1}}}) == false
+	end
+
 
 end

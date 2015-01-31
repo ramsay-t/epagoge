@@ -76,19 +76,27 @@ defmodule Epagoge.ILP do
 												{l,[]},
 												fn(sre,{m,acc}) ->
 														case sre do
-															{:eq,tgt,{:lit,_val}} ->
-																if Subs.subsumes?(m,sre) do
-																	{m,acc}
+															{:eq,t2,{:lit,_val}} ->
+																if t2 == tgt do
+																	if Subs.subsumes?(m,sre) do
+																		{m,acc}
+																	else
+																		{m,acc++[sre]}
+																	end
 																else
 																	{m,acc++[sre]}
 																end
-															{:match,_,_,tgt} ->
-																case join(m,sre) do
-																	nil ->
-																		{m,acc++[sre]}
-																	newmatch ->
-																		# Drop the subsumed match from the accumulator
-																		{newmatch,acc}
+															{:match,_,_,t2} ->
+																if t2 == tgt do
+																	case join(m,sre) do
+																		nil ->
+																			{m,acc++[sre]}
+																		newmatch ->
+																			# Drop the subsumed match from the accumulator
+																			{newmatch,acc}
+																	end
+																else
+																	{m,acc++[sre]}
 																end
 															_ ->
 																{m,acc++[sre]}
