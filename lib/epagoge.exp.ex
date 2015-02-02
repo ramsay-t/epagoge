@@ -345,6 +345,12 @@ defmodule Epagoge.Exp do
 	def freevars({:lit,_}) do
 		[]
 	end
+	def freevars({:get,_,_,e}) do
+		freevars(e)
+	end
+	def freevars({:match,_,_,e}) do
+		freevars(e)
+	end
 	def freevars({_,r}) do
 		:lists.usort(freevars(r))
 	end

@@ -171,6 +171,39 @@ defmodule Epagoge.Subsumption do
 		false
 	end
 
+	# Concat
+	defp subsumes_case({:concat,{:lit,pre},rest},{:lit,val}) do
+		if String.starts_with?(val,pre) do
+			subsumes?(rest,{:lit,String.slice(val,String.length(pre),String.length(val))})
+		else
+			false
+		end
+	end
+	defp subsumes_case({:concat,rest,{:lit,suf}},{:lit,val}) do
+		if String.ends_with?(val,suf) do
+			subsumes?(rest,{:lit,String.slice(val,String.length(val)-String.length(suf),String.length(val))})
+		else
+			false
+		end
+	end
+	defp subsumes_case({:concat,{:lit,pre},rest},{:concat,{:lit,pre2},rest2}) do
+		if String.starts_with?(pre2,pre) do
+			subsumes?(rest,{:concat,{:lit,String.slice(pre2,String.length(pre),String.length(pre2))},rest2})
+		else
+			false
+		end
+	end
+	defp subsumes_case({:concat,rest,{:lit,suf}},{:concat,rest2,{:lit,suf2}}) do
+		if String.ends_with?(suf2,suf) do
+			subsumes?(rest,{:concat,rest2,{:lit,String.slice(suf2,0,String.length(suf2)-String.length(suf))}})
+		else
+			false
+		end
+	end
+	defp subsumes_case({:v,_},{:concat,_,_}) do
+		true
+	end
+
 	defp subsumes_case(_l,_r) do
 		#raise to_string(:io_lib.format("Fell through subsumption: ~p vs ~p~n",[_l,_r]))
 		#:io.format("Fell through subsumption: ~p vs ~p~n",[_l,_r])

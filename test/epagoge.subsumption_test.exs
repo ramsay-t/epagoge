@@ -116,5 +116,11 @@ defmodule Epagoge.SubsumptionTest do
 
 	end
 
+	test "Concat subsumption" do
+		assert Subsumption.subsumes?({:assign,:r1,{:concat,{:lit,"tr"},{:v,:i1}}},{:assign,:r1,{:lit,"true"}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:concat,{:v,:i1},{:lit,"ue"}}},{:assign,:r1,{:lit,"true"}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:concat,{:lit,"t"},{:v,:i1}}},{:assign,:r1,{:concat,{:lit,"tr"},{:v,:i1}}}) == true
+		assert Subsumption.subsumes?({:assign,:r1,{:concat,{:v,:i1},{:lit,"e"}}},{:assign,:r1,{:concat,{:v,:i1},{:lit,"ue"}}}) == true
+	end
 
 end
