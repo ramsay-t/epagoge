@@ -1,5 +1,7 @@
 defmodule Epagoge.Exp do
 
+	@type t :: {:v,String.t} | {:lit, String.t} | {atom,t,t} 
+
 	# Logic
 	def eval({:eq,l,r},bind) do
 		{lv,_} = eval(l,bind)

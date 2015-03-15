@@ -64,4 +64,12 @@ defmodule Epagoge.ILPTest do
 		assert ILP.simplify([{:match,"c","e",{:v,:i1}},{:match,"c","ee",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
 	end
 
+	test "Simplifying subsumptive lists" do
+		assert ILP.simplify([
+												 {:assign,:o1,{:lit,"{ok,10}"}},
+												 {:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}
+												 ]) == 
+								 [{:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}]
+	end
+
 end
