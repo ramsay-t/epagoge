@@ -130,11 +130,13 @@ defmodule Epagoge.Simp do
 
 	defp make_pattern({op,a1,:any},lits) do
 		{<<255,255,255,255,0,0>>,
-		 make_bin(type_code(:op),op_code(op)) <> arg_to_pat(a1,lits) <> <<0,0>>}
+		 make_bin(type_code(:op),op_code(op)) <> arg_to_pat(a1,lits) <> <<0,0>>,
+		<<0,3,0,0,0,0>>}
 	end
 	defp make_pattern({op,:any,a2},lits) do
 		{<<255,255,0,0,255,255>>,
-		 make_bin(type_code(:op),op_code(op)) <> <<0,0>> <> arg_to_pat(a2,lits)}
+		 make_bin(type_code(:op),op_code(op)) <> <<0,0>> <> arg_to_pat(a2,lits),
+		<<0,3,0,0,0,0>>}
 	end
 
 	defp arg_to_pat({:lit,l1},lits) do
