@@ -113,7 +113,7 @@ defmodule Epagoge.Str do
 		[]
 	end
 	defp get_common_substrings(s1,s2) do
-		case largest_substring(s1,s2,String.length(s1)) do
+		case largest_substring(s1,s2,min(String.length(s1),String.length(s2))) do
 			false ->
 				get_common_substrings(String.slice(s1,1,String.length(s1)),s2)
 			{ss,n,m,len} ->
