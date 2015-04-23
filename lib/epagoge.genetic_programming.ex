@@ -86,9 +86,9 @@ defmodule Epagoge.GeneticProgramming do
 				{:v,:lists.nth(:random.uniform(length(names)),names)}
 			2 ->
 				# Literal...
-				case :random.uniform(2) do
+				case :random.uniform(4) do
 					1 -> {:lit,1}
-					2 -> {:lit,:random.uniform(1000)}
+					_ -> {:lit,:random.uniform(1000)}
 				end
 		end
 	end
@@ -209,9 +209,9 @@ defmodule Epagoge.GeneticProgramming do
 	defp is_sensible?(exp) do
 	  # Filter stupid possibilities
 		case exp do
-			{:multiply,{:lit,1},r} -> false
-			{:multiply,l,{:lit,1}} -> false
-			{:divide,l,{:lit,1}} -> false
+			{:multiply,{:lit,1},_} -> false
+			{:multiply,_,{:lit,1}} -> false
+			{:divide,_,{:lit,1}} -> false
 			{_,{:lit,_},{:lit,_}} -> false
 			_ -> true
 		end
