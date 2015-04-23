@@ -94,7 +94,12 @@ defmodule Epagoge.Exp do
 	def eval({:divide,l,r}, bind) do
 		case make_numbers(l,r,bind) do
 			false -> {false,bind}
-			{lv,rv} -> {lv / rv,bind}
+			{lv,rv} -> 
+				if rv == 0 do
+					raise "Divide by zero"
+				else
+					{lv / rv,bind}
+				end
 		end
 	end
 	def eval({:concat,l,r},bind) do
@@ -287,7 +292,7 @@ defmodule Epagoge.Exp do
 	def pp({:minus,l,r}) do
 		tpp(l) <> " - " <> tpp(r)
 	end
-	def pp({:times,l,r}) do
+	def pp({:multiply,l,r}) do
 		tpp(l) <> " * " <> tpp(r)
 	end
 	def pp({:divide,l,r}) do

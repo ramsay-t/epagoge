@@ -72,7 +72,7 @@ defmodule Epagoge.ExpTest do
 		assert Exp.pp({:assign,:x1,{:nt,{:v,:x2}}}) == "x1 := " <> << 172 :: utf8 >> <> "x2"
 		assert Exp.pp({:eq,{:ne,{:ge,{:lit,7},{:lit,9}},{:lit,true}},{:eq,{:le,{:lit,4},{:lit,6}},{:lt,{:lit,6},{:lit,8}}}}) == "((7 >= 9) != true) = ((4 =< 6) = (6 < 8))"
 		assert Exp.pp({:plus,{:v,:r1},{:minus,{:v,:r2},{:lit,1}}}) == "r1 + (r2 - 1)"
-		assert Exp.pp({:times,{:v,:r1},{:divide,{:v,:r2},{:lit,2}}}) == "r1 * (r2 / 2)"
+		assert Exp.pp({:multiply,{:v,:r1},{:divide,{:v,:r2},{:lit,2}}}) == "r1 * (r2 / 2)"
 		assert Exp.pp({:conj,{:lit,true},{:disj,{:nt,{:v,:r1}},{:v,:r2}}}) == "true ^ (" <> << 172 :: utf8 >> <> "r1 v r2)"
 	end
 
