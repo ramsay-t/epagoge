@@ -51,20 +51,20 @@ defmodule Epagoge.GeneticProgrammingTest do
 		Map.put(data,:o1,(data[:r1] + data[:r2]) / data[:i1])
 	end
 	
-	defp dset3 do
+	defp make_dset(f) do
 		Enum.map(:lists.seq(1,100), 
 										fn(_) -> 
 												d = %{}
-												d = Map.put(d,:r1,:random.uniform(1000))
-												d = Map.put(d,:r2,:random.uniform(1000))
-												d = Map.put(d,:i1,:random.uniform(1000))
-												calc(d)
+												d = Map.put(d,:r1,:random.uniform(100))
+												d = Map.put(d,:r2,:random.uniform(100))
+												d = Map.put(d,:i1,:random.uniform(100))
+												f.(d)
 										end)
 	end
 
 	@tag timeout: 120000
 	test "More complex calc" do
-		dset = dset3()
+		dset = make_dset(&calc/1)
 		exp = GenProg.infer(dset, :o1,[{:pop_size,30},{:thres,1.0}])
 		#:io.format("For (r1 + r2) / i1, Made: ~p~n",[Exp.pp(exp)])
 		# Arg! Algebra!!
@@ -75,5 +75,27 @@ defmodule Epagoge.GeneticProgrammingTest do
 						exp == {:plus, {:divide, {:v,:r2}, {:v,:i1}},{:divide,{:v,:r1},{:v,:i1}}})
 	end
 
+	defp classifier1(data) do
+		Map.put(data,:possible,(data[:i1] > 10))
+	end
+	
+	@tag timeout: 120000
+	test "Boolean decision" do
+		dset = make_dset(&classifier1/1)
+		exp = GenProg.infer(dset, :possible, [{:pop_size,30},{:thres,1.0}])
+		av = Enum.sum(Enum.map(dset, fn(data) -> 
+														{comp,_newdata} = Exp.eval(exp,data) 
+														if comp == data[:possible] do 0 else 1 end
+												end)) / length(dset)
+		score = 1 / (1 + av) 
+		assert score == 1.0
+		# Allow a small delta for the small sample size...
+		case exp do
+			{:gr,{:v,:i1},{:lit,cut}} ->
+				assert_in_delta(8,12,cut)
+			{:ge,{:v,:i1},{:lit,cut}} ->
+				assert_in_delta(9,13,cut)
+		end
+	end
 
 end
