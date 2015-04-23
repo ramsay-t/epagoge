@@ -162,20 +162,17 @@ defmodule Epagoge.GeneticProgramming do
 
 	# Add an operator and a random value
 	defp add_op(names,e) do
-		res = 
-			case :random.uniform(2) do
-				1 ->
-					{pick_op(),e,pick_val(names)}
-				2 ->
-					{pick_op(),pick_val(names),e}
-			end
-	  # Filter stupid possibilities
-		case res do
-			{:multiply,{:lit,1},r} -> add_op(names,e)
-			{:multiply,l,{:lit,1}} -> add_op(names,e)
-			{:divide,l,{:lit,1}} -> add_op(names,e)
-			{_,{:lit,_},{:lit,_}} -> add_op(names,e)
-			_ -> res
+		res = case :random.uniform(2) do
+						1 ->
+							{pick_op(),e,pick_val(names)}
+						2 ->
+							{pick_op(),pick_val(names),e}
+					end
+		if is_sensible?(res) do
+			res
+		else
+			# Try again...
+			add_op(names,e)
 		end
 	end
 
@@ -198,9 +195,25 @@ defmodule Epagoge.GeneticProgramming do
 		pick_val(names)
 	end
 	defp mod_val(names,{op,l,r}) do
-		case :random.uniform(2) do
+		res = case :random.uniform(2) do
 			1 -> {op,l,mod_val(names,r)}
 			2 -> {op,mod_val(names,l),r}
+		end
+		if is_sensible?(res) do
+			res
+		else
+			mod_val(names,{op,l,r})
+		end
+	end
+
+	defp is_sensible?(exp) do
+	  # Filter stupid possibilities
+		case exp do
+			{:multiply,{:lit,1},r} -> false
+			{:multiply,l,{:lit,1}} -> false
+			{:divide,l,{:lit,1}} -> false
+			{_,{:lit,_},{:lit,_}} -> false
+			_ -> true
 		end
 	end
 
