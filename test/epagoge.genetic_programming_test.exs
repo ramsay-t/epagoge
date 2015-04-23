@@ -66,7 +66,7 @@ defmodule Epagoge.GeneticProgrammingTest do
 	test "More complex calc" do
 		dset = dset3()
 		exp = GenProg.infer(dset, :o1,[{:pop_size,30},{:thres,1.0}])
-		:io.format("For (r1 + r2) / i1, Made: ~p~n",[Exp.pp(exp)])
+		#:io.format("For (r1 + r2) / i1, Made: ~p~n",[Exp.pp(exp)])
 		# Arg! Algebra!!
 		assert (exp == {:divide, {:plus, {:v,:r1}, {:v, :r2}}, {:v,:i1}}
 						or
