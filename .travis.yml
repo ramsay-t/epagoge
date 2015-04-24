@@ -13,5 +13,6 @@ before_install:
    - export PATH=`pwd`/elixir/bin:$PATH
    - mix local.hex --force
    - mix deps.get
+   - mix deps.compile
 before_script: "export PATH=`pwd`/elixir/bin:$PATH"
 script: mix test --max-cases 1
