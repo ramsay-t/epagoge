@@ -4,11 +4,9 @@ defmodule Epagoge.GeneticProgrammingTest do
 	alias Epagoge.GeneticProgramming, as: GenProg
 
 	setup_all do
-		IO.puts "Setting up worker pool..."
 		:net_adm.world()
-		peasants = Enum.map(:lists.seq(1,10), fn(_) -> :sk_peasant.start() end)
+		peasants = Enum.map(:lists.seq(1,50), fn(_) -> :sk_peasant.start() end)
 		on_exit(fn() ->
-								IO.puts "Terminating workers..."
 								Enum.map(peasants, fn(peasant) -> send peasant, :terminate end)
 						end)
 	end
@@ -62,10 +60,10 @@ defmodule Epagoge.GeneticProgrammingTest do
 										end)
 	end
 
-	@tag timeout: 120000
+	@tag timeout: 300000
 	test "More complex calc" do
 		dset = make_dset(&calc/1)
-		exp = GenProg.infer(dset, :o1,[{:pop_size,30},{:thres,1.0}])
+		exp = GenProg.infer(dset, :o1,[{:pop_size,50},{:thres,1.0}])
 		#:io.format("For (r1 + r2) / i1, Made: ~p~n",[Exp.pp(exp)])
 		# Arg! Algebra!!
 		assert (exp == {:divide, {:plus, {:v,:r1}, {:v, :r2}}, {:v,:i1}}
@@ -79,10 +77,10 @@ defmodule Epagoge.GeneticProgrammingTest do
 		Map.put(data,:possible,(data[:i1] > 10))
 	end
 	
-	@tag timeout: 120000
+	@tag timeout: 300000
 	test "Boolean decision" do
 		dset = make_dset(&classifier1/1)
-		exp = GenProg.infer(dset, :possible, [{:pop_size,30},{:thres,1.0}])
+		exp = GenProg.infer(dset, :possible, [{:pop_size,50},{:thres,1.0}])
 		av = Enum.sum(Enum.map(dset, fn(data) -> 
 														{comp,_newdata} = Exp.eval(exp,data) 
 														if comp == data[:possible] do 0 else 1 end
@@ -95,7 +93,37 @@ defmodule Epagoge.GeneticProgrammingTest do
 				assert_in_delta(8,12,cut)
 			{:ge,{:v,:i1},{:lit,cut}} ->
 				assert_in_delta(9,13,cut)
+			{:lt,{:lit,cut},{:v,:i1}} ->
+				assert_in_delta(8,12,cut)
+			{:le,{:lit,cut},{:v,:i1}} ->
+				assert_in_delta(9,13,cut)
 		end
+	end
+
+	defp hardclassifier(data) do
+		Map.put(data,:possible,((data[:i1] > 75) or (data[:r1] < 50)))
+	end
+
+	@tag timeout: 300000
+	test "Hard boolean decision" do
+		dset = make_dset(&hardclassifier/1)
+		exp = GenProg.infer(dset, :possible, [{:pop_size,50},{:thres,1.0}])
+		av = Enum.sum(Enum.map(dset, fn(data) -> 
+																		 {comp,_newdata} = Exp.eval(exp,data) 
+																		 if comp == data[:possible] do 0 else 1 end
+																 end)) / length(dset)
+		score = 1 / (1 + av)
+		assert score == 1.0
+		# Unfortunately, the classifier is often more complex but algebraicaly equivilent,
+		# so we can't test the actual structure. However, we can test its score over another
+		# sample and it should be reasonably predictive...
+		dset2 = make_dset(&hardclassifier/1)
+		av = Enum.sum(Enum.map(dset2, fn(data) -> 
+																			{comp,_newdata} = Exp.eval(exp,data) 
+																			if comp == data[:possible] do 0 else 1 end
+																	end)) / length(dset)
+		score = 1 / (1 + av)
+		assert score > 0.9
 	end
 
 end

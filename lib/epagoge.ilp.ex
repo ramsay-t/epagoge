@@ -143,6 +143,28 @@ defmodule Epagoge.ILP do
 				 end
 		end
 	end
+	# Numerics...
+	def simplify_step({:plus,{:lit,0},x}) do
+		x
+	end
+	def simplify_step({:plus,x,{:lit,0}}) do
+		x
+	end
+	def simplify_step({:minus,{:lit,0},x}) do
+		x
+	end
+	def simplify_step({:minus,x,{:lit,0}}) do
+		x
+	end
+	def simplify_step({:multiply,{:lit,1},x}) do
+		x
+	end
+	def simplify_step({:multiply,x,{:lit,1}}) do
+		x
+	end
+	def simplify_step({:divide,x,{:lit,1}}) do
+		x
+	end
 	def simplify_step(e) do
 		e
 	end
