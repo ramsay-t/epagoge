@@ -165,6 +165,62 @@ defmodule Epagoge.ILP do
 	def simplify_step({:divide,x,{:lit,1}}) do
 		x
 	end
+
+	def simplify_step({:lt,{:lit,x},{:lit,y}}) do
+		{:lit,x < y}
+	end
+	def simplify_step({:le,{:lit,x},{:lit,y}}) do
+		{:lit,x <= y}
+	end
+	def simplify_step({:gr,{:lit,x},{:lit,y}}) do
+		{:lit,x > y}
+	end
+	def simplify_step({:ge,{:lit,x},{:lit,y}}) do
+		{:lit,x >= y}
+	end
+
+
+	def simplify_step({:lt,{:lit,x},y}) do
+		{:gr,y,{:lit,x}}
+	end
+	def simplify_step({:le,{:lit,x},y}) do
+		{:ge,y,{:lit,x}}
+	end
+	def simplify_step({:gr,{:lit,x},y}) do
+		{:lt,y,{:lit,x}}
+	end
+	def simplify_step({:ge,{:lit,x},y}) do
+		{:le,y,{:lit,x}}
+	end
+
+	def simplify_step({:multiply,{:lit,1},x}) do
+		x
+	end
+	def simplify_step({:divide,x,{:lit,1}}) do
+		x
+	end
+	def simplify_step({:plus,{:lit,0},x}) do
+		x
+	end
+	def simplify_step({:plus,x,{:lit,0}}) do
+		x
+	end
+	def simplify_step({:minus,x,{:lit,0}}) do
+		x
+	end
+
+	# Catch all others
+	def simplify_step({op,l,r}) do
+		#:io.format("Simplifying ~p... ",[Exp.pp({op,l,r})])
+		sl = simplify_step(l)
+		sr = simplify_step(r)
+		#:io.format(" got ~p~n",[Exp.pp({op,sl,sr})])
+		if {op,sl,sr} != {op,l,r} do
+			simplify_step({op,sl,sr})
+		else
+			{op,l,r}
+		end
+	end
 	def simplify_step(e) do
 		e
 	end
