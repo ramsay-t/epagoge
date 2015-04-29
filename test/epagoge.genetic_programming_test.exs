@@ -107,21 +107,21 @@ defmodule Epagoge.GeneticProgrammingTest do
 		Map.put(data,:possible,((data[:i1] > 75) or (data[:r1] < 50)))
 	end
 
-	@tag timeout: 300000
-	test "Hard boolean decision" do
-		dset = make_dset(&hardclassifier/1)
-		exp = GenProg.infer(dset, :possible, [{:pop_size,30},{:thres,1.0}])
-		#:io.format("Made ~p~n",[Exp.pp(exp)])
-		av = Enum.sum(Enum.map(dset, fn(data) -> 
-																		 {comp,_newdata} = Exp.eval(exp,data) 
-																		 if comp == data[:possible] do 0 else 1 end
-																 end)) / length(dset)
-		score = 1 / (1 + av)
-		assert score == 1.0
-		# Unfortunately, the classifier is often more complex but algebraicaly equivilent,
-		# so we can't test the actual structure. However, we can test its score over another
-		# sample and it should be reasonably predictive...
-		check(exp,:possible,&hardclassifier/1)
-	end
+#	@tag timeout: 300000
+#	test "Hard boolean decision" do
+#		dset = make_dset(&hardclassifier/1)
+#		exp = GenProg.infer(dset, :possible, [{:pop_size,30},{:thres,1.0}])
+#		#:io.format("Made ~p~n",[Exp.pp(exp)])
+#		av = Enum.sum(Enum.map(dset, fn(data) -> 
+#																		 {comp,_newdata} = Exp.eval(exp,data) 
+#																		 if comp == data[:possible] do 0 else 1 end
+#																 end)) / length(dset)
+#		score = 1 / (1 + av)
+#		assert score == 1.0
+#		# Unfortunately, the classifier is often more complex but algebraicaly equivilent,
+#		# so we can't test the actual structure. However, we can test its score over another
+#		# sample and it should be reasonably predictive...
+#		check(exp,:possible,&hardclassifier/1)
+#	end
 
 end
