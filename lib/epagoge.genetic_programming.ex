@@ -3,7 +3,7 @@ defmodule Epagoge.GeneticProgramming do
 	alias Epagoge.ILP, as: ILP
 
 	def infer(dataset, target) do
-		infer(dataset,target,[{:pop_size,10},{:thres,1.0}])
+		infer(dataset,target,[{:pop_size,10},{:thres,1.0},{:limit,100}])
 	end
 	def infer(dataset, target, options) do
 		names = get_v_names(dataset)
