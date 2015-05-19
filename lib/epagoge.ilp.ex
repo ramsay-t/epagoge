@@ -197,13 +197,25 @@ defmodule Epagoge.ILP do
 	def simplify_step({:eq,{:lit,x},{:lit,x}}) do
 		{:lit,true}
 	end
-	def simplify_step({:eq,{:lit,x},{:lit,y}}) do
+	def simplify_step({:eq,{:lit,_x},{:lit,_y}}) do
 		{:lit,false}
 	end
 	def simplify_step({:eq,{:v,x},{:v,x}}) do
 		{:lit,true}
 	end
-
+	def simplify_step({:nt,{:eq,l,r}}) do
+		{:ne,l,r}
+	end
+	def simplify_step({:nt,{:ne,l,r}}) do
+		{:eq,l,r}
+	end
+	def simplify_step({:nt,{:lit,true}}) do
+		{:lit,false}
+	end
+	def simplify_step({:nt,{:lit,false}}) do
+		{:lit,true}
+	end
+	
 	# Catch all others
 	def simplify_step({op,l,r}) do
 		#:io.format("Simplifying ~p... ",[Exp.pp({op,l,r})])
