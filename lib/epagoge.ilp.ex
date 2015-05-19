@@ -8,7 +8,8 @@ defmodule Epagoge.ILP do
 		IO.puts "\n----------------------------------------------------------"
 		pps = Enum.map(ps,&NF.dnf/1)
 		Enum.map(pps, fn p -> :io.format("~p~n             ~p~n",[Exp.pp(p),Exp.freevars(p)]) end)
-		:fixme
+		#FIXME
+		ps
 	end
 
 	# Reflexivity

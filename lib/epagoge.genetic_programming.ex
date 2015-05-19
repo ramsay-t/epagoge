@@ -152,13 +152,19 @@ defmodule Epagoge.GeneticProgramming do
 		case :random.uniform(2) do
 			1 ->
 				# Variable...
+				# This crashes if there are no names, but I can't see how that will 
+				# ever be meaningful
 				{:v,:lists.nth(:random.uniform(length(names)),names)}
 			2 ->
 				# Literal...
-				# Boolean literals are never useful!
-				case :random.uniform(4) do
-					1 -> {:lit,1}
-					_ -> {:lit,:random.uniform(litmax-litmin) + litmin}
+				# Boolean literals are never useful?
+				if litmax - litmin == 0 do
+					{:lit,1}
+				else
+					case :random.uniform(4) do
+						1 -> {:lit,1}
+						_ -> {:lit,:random.uniform(litmax-litmin) + litmin}
+					end
 				end
 		end
 	end
