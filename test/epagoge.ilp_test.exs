@@ -78,7 +78,11 @@ defmodule Epagoge.ILPTest do
 		assert ILP.simplify({:eq,{:lit,"hello"},{:lit,"hello"}}) == {:lit,true}
 		assert ILP.simplify({:eq,{:lit,"hello"},{:lit,"goodby"}}) == {:lit,false}
 		assert ILP.simplify({:eq,{:v,:x},{:v,:x}}) == {:lit,true}
-	
+		assert ILP.simplify({:ne,{:ne,{:v,:r1},{:lit,"wine"}},{:eq,{:v,:r1},{:lit,"beer"}}}) == 
+								 {:conj,
+									{:ne,{:v,:r1},{:lit,"wine"}},
+									{:ne,{:v,:r1},{:lit,"beer"}}
+								 }
 	end
 
 end

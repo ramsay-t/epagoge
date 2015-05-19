@@ -132,18 +132,6 @@ defmodule Epagoge.ILP do
 			list_to_conj([sl | filtered])
 		end
 	end
-	def simplify_step({:conj,l,r}) do
-		sl = simplify(l)
-		sr = simplify(r)
-		if Subs.subsumes?(sl,sr) do 
-			sl
-		else if Subs.subsumes?(sr,sl) do
-					 sr
-				 else
-					 {:conj,sl,sr}
-				 end
-		end
-	end
 	# Numerics...
 	def simplify_step({:plus,{:lit,0},x}) do
 		x
@@ -216,7 +204,60 @@ defmodule Epagoge.ILP do
 		{:lit,true}
 	end
 	
+	# Move variables left...
+	def simplify_step({:eq,{:lit,v},{:v,x}}) do
+		{:eq,{:v,x},{:lit,v}}
+	end
+
+
+	def simplify_step({:disj,{:eq,l,r},{:ne,l,r}}) do
+		{:lit,true}
+	end
+	def simplify_step({:disj,{:ne,l,r},{:eq,l,r}}) do
+		{:lit,true}
+	end
+
+	def simplify_step({:conj,{:eq,x,v},{:eq,x,v}}) do
+		simplify({:eq,x,v})
+	end
+	def simplify_step({:conj,{:eq,x,{:lit,v}},{:eq,x,{:lit,o}}}) do
+		{:lit,false}
+	end
+	
+	def simplify_step({:disj,x,{:lit,false}}) do
+		simplify(x)
+	end
+	def simplify_step({:disj,{:lit,false},x}) do
+		simplify(x)
+	end
+	def simplify_step({:conj,_x,{:lit,false}}) do
+		{:lit,false}
+	end
+	def simplify_step({:conj,{:lit,false},_x}) do
+		{:lit,false}
+	end
+
+
+	def simplify_step({:ne,{lop,ll,lr},{rop,rl,rr}}) when (lop == :eq or lop == :ne) and (rop == :eq or rop == :ne) do
+		l = simplify({:conj,simplify({lop,ll,lr}),simplify({:nt,{rop,rl,rr}})})
+		r = simplify({:conj,simplify({:nt,{lop,ll,lr}}),simplify({rop,rl,rr})})
+		simplify({:disj,l,r})
+	end
+
 	# Catch all others
+	def simplify_step({:conj,l,r}) do
+		sl = simplify(l)
+		sr = simplify(r)
+		if Subs.subsumes?(sl,sr) do 
+			sl
+		else if Subs.subsumes?(sr,sl) do
+					 sr
+				 else
+					 {:conj,sl,sr}
+				 end
+		end
+	end
+
 	def simplify_step({op,l,r}) do
 		#:io.format("Simplifying ~p... ",[Exp.pp({op,l,r})])
 		sl = simplify_step(l)
