@@ -1,6 +1,7 @@
 defmodule Epagoge.ILPTest do
   use ExUnit.Case
 	alias Epagoge.ILP, as: ILP
+	alias Epagoge.Exp, as: Exp
 
 	defp p1 do
 		{:conj,{:lt,{:v,:r1},{:lit,"6"}},{:gr,{:v,:r2},{:lit,"9"}}}
@@ -14,7 +15,8 @@ defmodule Epagoge.ILPTest do
 	end
 
 	#test "Numeric generalisation" do
-	#	assert ILP.generalise([p1,p2]) == {:lit,"fixme"}
+	#	:io.format("~p~n~p~n",[Exp.pp(p1),Exp.pp(p2)])
+	#	assert ILP.generalise([p1,p2]) == :fixme
 	#end
 
 	test "String joins" do
@@ -70,6 +72,13 @@ defmodule Epagoge.ILPTest do
 												 {:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}
 												 ]) == 
 								 [{:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}]
+	end
+
+	test "Simplifying common examples" do
+		assert ILP.simplify({:eq,{:lit,"hello"},{:lit,"hello"}}) == {:lit,true}
+		assert ILP.simplify({:eq,{:lit,"hello"},{:lit,"goodby"}}) == {:lit,false}
+		assert ILP.simplify({:eq,{:v,:x},{:v,:x}}) == {:lit,true}
+	
 	end
 
 end

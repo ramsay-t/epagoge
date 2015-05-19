@@ -11,11 +11,12 @@ defmodule Epagoge.GeneticProgramming do
 	def infer(dataset, target, options) do
 		names = get_v_names(dataset)
 		litrange = get_lit_range(dataset)
+		strings = get_lit_strings(dataset)
 		case get_type(dataset,target) do
 			:num ->
 				:elgar.run(&num_generator(names,litrange,&1),&num_fitness(dataset,target,&1),num_mutations(names,litrange),&num_crossover/2,options)
 			:bool ->
-				:elgar.run(&bool_generator(names,litrange,&1),&bool_fitness(dataset,target,&1),bool_mutations(names,litrange),&bool_crossover/2,options)
+				:elgar.run(&bool_generator(names,{litrange,strings},&1),&bool_fitness(dataset,target,&1),bool_mutations(names,{litrange,strings}),&bool_crossover/2,options)
 		end
 	end
 
@@ -26,6 +27,25 @@ defmodule Epagoge.GeneticProgramming do
 		else
 			:num
 		end
+	end
+
+	defp get_lit_strings(dataset) do
+		get_lit_strings(dataset,[])
+	end
+	defp get_lit_strings([],ss) do
+		ss
+	end
+	defp get_lit_strings([data | dataset],ss) do
+		newss = :lists.usort(ss ++ Enum.flat_map(Map.keys(data),
+																						fn(k) ->
+																								v = data[k]
+																								if String.valid?(v) do
+																									[v]
+																								else
+																									[]
+																								end
+																						end))
+		get_lit_strings(dataset,newss)
 	end
 
 	defp get_lit_range(dataset) do
@@ -148,6 +168,20 @@ defmodule Epagoge.GeneticProgramming do
 	# The literal 1 is weighted heavily, partly because simple increment is
 	# common, and partly because there are other mutations that will transform
 	# the literal later
+	defp pick_val(names,{{litmin,litmax},strings}) do
+		if strings == [] do
+			pick_val(names,{litmin,litmax})
+		else
+			case :random.uniform(2) do
+				1 -> 
+					pick_val(names,{litmin,litmax})
+				2 ->
+					{:lit,:lists.nth(:random.uniform(length(strings)),strings)}
+			end
+		end
+	end
+
+
 	defp pick_val(names,{litmin,litmax}) do
 		case :random.uniform(2) do
 			1 ->
@@ -175,7 +209,7 @@ defmodule Epagoge.GeneticProgramming do
 	defp pick_op(type) do
 		ops = case type do
 						:arith -> [:plus,:minus,:divide,:multiply]
-						:comp -> [:gr,:ge,:lt,:le,:eq,:ne]
+						:comp -> [:gr,:ge,:lt,:le,:ne,:eq]
 						:bool -> [:conj,:disj]
 					end
 		:lists.nth(:random.uniform(length(ops)),ops)
@@ -534,37 +568,9 @@ defmodule Epagoge.GeneticProgramming do
 	end
 
 	defp is_sensible?(exp) do
-		#:io.format("Filtering ~p~n",[Exp.pp(exp)])
-	  # Filter stupid possibilities
-		case exp do
-			{:multiply,{:lit,1},_} -> false
-			{:multiply,_,{:lit,1}} -> false
-			{:divide,_,{:lit,1}} -> false
-			{:plus,_,{:lit,0}} -> false
-			{:plus,{:lit,0},_} -> false
-			{:divide,_,{:lit,0}} -> false
-			{_,{:lit,_},{:lit,_}} -> false
-			{:conj,{:lit,_},_} -> false
-			{:conj,_,{:lit,_}} -> false
-			{:disj,{:lit,_},_} -> false
-			{:disj,_,{:lit,_}} -> false
-			{:eq,{:lit,true},_} -> false
-			{:eq,_,{:lit,true}} -> false
-			{:ne,{:lit,true},_} -> false
-			{:ne,_,{:lit,true}} -> false
-			{:eq,{:lit,false},_} -> false
-			{:eq,_,{:lit,false}} -> false
-			{:ne,{:lit,false},_} -> false
-			{:ne,_,{:lit,false}} -> false
-			{:eq,{:v,name},{:v,name}} -> false
-			{:ne,{:v,name},{:v,name}} -> false
-			{:gr,{:v,name},{:v,name}} -> false
-			{:ge,{:v,name},{:v,name}} -> false
-			{:lt,{:v,name},{:v,name}} -> false
-			{:le,{:v,name},{:v,name}} -> false
-			{:eq,x,x} -> false
-			{:neq,x,x} -> false
-			_ -> true
-		end
+		# This should all be handled by the simplifier!
+		#FIXME remove calls to here and improve the simplifier
+		true
 	end
+
 end
