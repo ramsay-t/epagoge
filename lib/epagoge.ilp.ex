@@ -220,7 +220,7 @@ defmodule Epagoge.ILP do
 	def simplify_step({:conj,{:eq,x,v},{:eq,x,v}}) do
 		simplify({:eq,x,v})
 	end
-	def simplify_step({:conj,{:eq,x,{:lit,v}},{:eq,x,{:lit,o}}}) do
+	def simplify_step({:conj,{:eq,x,{:lit,_v}},{:eq,x,{:lit,_o}}}) do
 		{:lit,false}
 	end
 	
@@ -228,6 +228,12 @@ defmodule Epagoge.ILP do
 		simplify(x)
 	end
 	def simplify_step({:disj,{:lit,false},x}) do
+		simplify(x)
+	end
+	def simplify_step({:conj,x,{:lit,true}}) do
+		simplify(x)
+	end
+	def simplify_step({:conj,{:lit,true},x}) do
 		simplify(x)
 	end
 	def simplify_step({:conj,_x,{:lit,false}}) do
