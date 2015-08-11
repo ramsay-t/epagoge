@@ -193,6 +193,9 @@ defmodule Epagoge.Exp do
 	defp index_of_step("",_,_) do
 		nil
 	end
+	defp index_of_step(nil,_,_) do
+		nil
+	end
 	defp index_of_step(h,n,i) do
 		if String.starts_with?(h,n) do
 			i
