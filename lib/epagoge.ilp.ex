@@ -61,6 +61,13 @@ defmodule Epagoge.ILP do
 		end
 	end
 
+	def simplify_step({:get,"","",v}) do
+		simplify(v)
+	end
+	def simplify_step({:match,"","",v}) do
+		{:lit,true}
+	end
+
 	def simplify_step({:conj,{:lit, true},e}) do
 		simplify(e)
 	end
