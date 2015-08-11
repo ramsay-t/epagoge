@@ -35,6 +35,9 @@ defmodule Epagoge.Str do
 	defp make_match(pre,_cont,"") do
 		{pre,""}
 	end
+	defp make_match(pre,cont,nil) do
+		{pre,""}
+	end
 	defp make_match(pre,cont,rest) do
 		if String.starts_with?(rest,cont) do
 			# Yes, I know length(rest) is too big, but that will still work and it

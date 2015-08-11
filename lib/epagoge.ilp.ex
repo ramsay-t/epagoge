@@ -203,6 +203,18 @@ defmodule Epagoge.ILP do
 	def simplify_step({:nt,{:lit,false}}) do
 		{:lit,true}
 	end
+	def simplify_step({:nt,{:ge,l,r}}) do
+		{:lt,l,r}
+	end
+	def simplify_step({:nt,{:le,l,r}}) do
+		{:gt,l,r}
+	end
+	def simplify_step({:nt,{:gt,l,r}}) do
+		{:le,l,r}
+	end
+	def simplify_step({:nt,{:lt,l,r}}) do
+		{:ge,l,r}
+	end
 	
 	# Move variables left...
 	def simplify_step({:eq,{:lit,v},{:v,x}}) do
