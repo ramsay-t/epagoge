@@ -91,11 +91,17 @@ defmodule Epagoge.Subsumption do
 
 	#FIXME: this doesn't feel complete. I can imagine there might be 
 	#       a circumstance where you need both halves to subsume...
+	defp subsumes_case({:conj,l,r},{:conj,l2,r2}) do
+		(subsumes_case(l,l2) and subsumes_case(l,r2))
+		or (subsumes_case(r,l2) and subsumes_case(r,r2))
+		or (subsumes_case(l,l2) and subsumes_case(r,r2))
+		or (subsumes_case(r,l2) and subsumes_case(l,r2))
+	end
 	defp subsumes_case({:conj,l,r},o) do
-		subsumes_case(l,o) or subsumes_case(r,o)
+		subsumes_case(l,o) and subsumes_case(r,o)
 	end
 	defp subsumes_case(o,{:conj,l,r}) do
-		subsumes_case(o,l) and subsumes_case(o,r)
+		subsumes_case(o,l) or subsumes_case(o,r)
 	end
 
 	# Some numerics

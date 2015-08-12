@@ -65,6 +65,27 @@ defmodule Epagoge.SubsumptionTest do
 																		 {:eq,{:v,:r1},{:lit,2}},
 																		 {:eq,{:lit,1},{:v,:r2}}
 																]) == true
+		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],
+																 [{:eq,{:v,:r1},{:v,:r2}},{:eq,{:v,:r2},{:v,:r3}}]) == true
+	end
+
+	test "Conjunction subsumption" do
+		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},
+																 {:conj,
+																	{:eq,{:v,:r1},{:v,:r2}},
+																	{:eq,{:v,:r2},{:v,:r3}}
+																 }) == true
+		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},
+																 {:conj,
+																	{:eq,{:v,:r2},{:v,:r3}},
+																	{:eq,{:v,:r1},{:v,:r2}}
+																 }) == true
+		assert Subsumption.subsumes?({:conj,
+																	{:eq,{:v,:r2},{:v,:r3}},
+																	{:eq,{:v,:r1},{:v,:r2}}
+																 },
+																 {:eq,{:v,:r1},{:v,:r2}}) == false
+
 	end
 
 	test "Subsumption of numerics" do
