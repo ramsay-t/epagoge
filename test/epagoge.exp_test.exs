@@ -124,6 +124,8 @@ defmodule Epagoge.ExpTest do
 										%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}) == 
 								 {nil,%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}}
 		assert Exp.eval({:get,"co","e",{:v,:i1}},%{}) == {nil,%{}}
+		assert Exp.eval({:get,"key=",";session=ok;",{:v,:o1}},%{o1: "key=abc;session=ok;"}) == {"abc",%{o1: "key=abc;session=ok;"}}
+		assert Exp.eval({:get,"key=","suf",{:v,:o1}},%{o1: "suf;key=abcsuf;session=ok;"}) == {"abc",%{o1: "suf;key=abcsuf;session=ok;"}}
 	end
 
 	test "Pretty print concat" do

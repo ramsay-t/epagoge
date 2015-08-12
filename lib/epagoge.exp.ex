@@ -165,7 +165,7 @@ defmodule Epagoge.Exp do
 	end
 	defp get_val(v,pi,[si | sis]) do
 		if si > pi do
-			String.slice(v,pi,String.length(v)-si+1)
+			String.slice(v,pi,si-pi)
 		else
 			get_val(v,pi,sis)
 		end
@@ -183,7 +183,7 @@ defmodule Epagoge.Exp do
 						[i]
 					is ->
 						# We have to offset the children because we have sliced the string...
-						[i | Enum.map(is, fn(idx) -> idx + i end)]
+						[i | Enum.map(is, fn(idx) -> idx + i + String.length(needle) end)]
 				end
 		end
 	end
