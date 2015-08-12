@@ -126,7 +126,7 @@ defmodule Epagoge.ExpTest do
 		assert Exp.eval({:get,"co","e",{:v,:i1}},%{}) == {nil,%{}}
 		assert Exp.eval({:get,"key=",";session=ok;",{:v,:o1}},%{o1: "key=abc;session=ok;"}) == {"abc",%{o1: "key=abc;session=ok;"}}
 		assert Exp.eval({:get,"key=","suf",{:v,:o1}},%{o1: "suf;key=abcsuf;session=ok;"}) == {"abc",%{o1: "suf;key=abcsuf;session=ok;"}}
-		assert Exp.eval({:get,"k","",{:v,:i1}},%{i1: "k=abc"}) == {"abc",%{i1: "k=abc"}}
+		assert Exp.eval({:get,"k","",{:v,:i1}},%{i1: "k=abc"}) == {"=abc",%{i1: "k=abc"}}
 	end
 
 	test "Pretty print concat" do
