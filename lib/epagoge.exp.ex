@@ -147,7 +147,7 @@ defmodule Epagoge.Exp do
 					case suf do
 						# Empty means right to the end
 						"" ->
-							{String.slice(v,pi,String.length(v)),bind}
+							{String.slice(v,pi+String.length(pre),String.length(v)),bind}
 						_ ->
 							case all_indices(v,suf) do
 								nil ->
