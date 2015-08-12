@@ -6,7 +6,7 @@ defmodule Epagoge.GeneticProgramming do
 	# Since it specifies a fixed limit it will always terminate
 	# but it may return a pair {:incomplete,Val} if it hits the limit
 	def infer(dataset, target) do
-		infer(dataset,target,[{:pop_size,10},{:thres,1.0},{:limit,100}])
+		infer(dataset,target,[{:pop_size,40},{:thres,1.0},{:limit,100}])
 	end
 	def infer(dataset, target, options) do
 		names = get_v_names(dataset)
