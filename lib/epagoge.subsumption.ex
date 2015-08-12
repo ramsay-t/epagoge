@@ -43,8 +43,20 @@ defmodule Epagoge.Subsumption do
 	defp subsumes_case({:match,lpre,lsuf,lt},{:match,rpre,rsuf,rt}) do
 		if lt != rt do
 			false
-		else
-			String.ends_with?(rpre,lpre) and String.starts_with?(rsuf,lsuf)
+		else 
+			p = case {rpre,lpre} do
+						{"",""} -> true
+						{"",_} -> false
+						{_,""} -> true
+						_ -> String.ends_with?(rpre,lpre)
+					end
+			s = case {rsuf,lsuf} do
+						{"",""} -> true
+						{"",_} -> false
+						{_,""} -> true
+						_ -> String.starts_with?(rsuf,lsuf)
+					end
+			p and s
 		end
 	end
 	defp subsumes_case({:match,_pre,_suf,{:v,tgt}}=l,{:eq,{:v,tgt},{:lit,val}}) do
