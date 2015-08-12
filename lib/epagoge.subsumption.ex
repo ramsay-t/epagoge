@@ -60,6 +60,9 @@ defmodule Epagoge.Subsumption do
 	defp subsumes_case({:get,p1,s1,tgt},{:get,p2,s2,tgt}) do
 		subsumes?({:match,p1,s1,tgt},{:match,p2,s2,tgt})
 	end
+	defp subsumes_case({:get,p1,s1,tgt},{:eq,tgt,{:lit,str}}=r) do
+		subsumes?({:match,p1,s1,tgt},r)
+	end
 	# Special case - assignment from src is equivilent to get("","",src)
 	defp subsumes_case({:assign,tgt,src},{:assign,tgt,{:get,_,_,src}}) do
 		true

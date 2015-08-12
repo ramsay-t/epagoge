@@ -123,4 +123,12 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:assign,:r1,{:concat,{:v,:i1},{:lit,"e"}}},{:assign,:r1,{:concat,{:v,:i1},{:lit,"ue"}}}) == true
 	end
 
+	test "Get subsumption over literal equations" do
+		assert Subsumption.subsumes?({:get,"k=",";",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc;"}}) == true
+		assert Subsumption.subsumes?({:get,"k=",";",{:v,:r1}},{:eq,{:v,:r1},{:lit,"jabc;"}}) == false
+		assert Subsumption.subsumes?({:get,"k=",";",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc"}}) == false
+		assert Subsumption.subsumes?({:get,"k","",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc;"}}) == true
+		assert Subsumption.subsumes?({:get,"","",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc;"}}) == true
+	end
+
 end

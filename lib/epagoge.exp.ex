@@ -161,7 +161,7 @@ defmodule Epagoge.Exp do
 	end
 	defp get_val(v,pi,[si | sis]) do
 		if si > pi do
-			String.slice(v,pi,si-pi+1)
+			String.slice(v,pi,si-pi)
 		else
 			get_val(v,pi,sis)
 		end
