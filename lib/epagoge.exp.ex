@@ -137,22 +137,26 @@ defmodule Epagoge.Exp do
 
 	def eval({:get,pre,suf,tgt},bind) do
 		{v,_} = eval(tgt,bind)
-		case index_of(v,pre) do
-			nil ->
-				{nil,bind}
-			pi ->
-				case suf do
-					# Empty means right to the end
-					"" ->
-						{String.slice(v,pi,String.length(v)),bind}
-					_ ->
-						case all_indices(v,suf) do
-							nil ->
-								{nil,bind}
-							sis ->
-								{get_val(v,pi+String.length(pre),sis),bind}
-						end
-				end
+		if v == nil do
+			{nil,bind}
+		else
+			case index_of(v,pre) do
+				nil ->
+					{nil,bind}
+				pi ->
+					case suf do
+						# Empty means right to the end
+						"" ->
+							{String.slice(v,pi,String.length(v)),bind}
+						_ ->
+							case all_indices(v,suf) do
+								nil ->
+									{nil,bind}
+								sis ->
+									{get_val(v,pi+String.length(pre),sis),bind}
+							end
+					end
+			end
 		end
 	end
 

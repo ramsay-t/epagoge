@@ -123,6 +123,7 @@ defmodule Epagoge.ExpTest do
 		assert Exp.eval({:get,"co","e",{:v,:i1}},
 										%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}) == 
 								 {nil,%{:i1 => "wiblewobblenoise;key=abc;morenoisekkkee"}}
+		assert Exp.eval({:get,"co","e",{:v,:i1}},%{}) == {nil,%{}}
 	end
 
 	test "Pretty print concat" do
