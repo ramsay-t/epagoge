@@ -67,7 +67,7 @@ defmodule Epagoge.GeneticProgrammingTest do
 																			if comp == data[target] do 0 else 1 end
 																	end)) / length(dset2)
 		score = 1 / (1 + av)
-		assert score > 0.9
+		assert score > 0.8
 	end
 
 	@tag timeout: 300000
