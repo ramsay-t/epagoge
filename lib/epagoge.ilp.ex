@@ -214,9 +214,9 @@ defmodule Epagoge.ILP do
 		{:lt,l,r}
 	end
 	def simplify_step({:nt,{:le,l,r}}) do
-		{:gt,l,r}
+		{:gr,l,r}
 	end
-	def simplify_step({:nt,{:gt,l,r}}) do
+	def simplify_step({:nt,{:gr,l,r}}) do
 		{:le,l,r}
 	end
 	def simplify_step({:nt,{:lt,l,r}}) do
