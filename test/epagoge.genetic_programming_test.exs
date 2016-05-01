@@ -125,13 +125,13 @@ defmodule Epagoge.GeneticProgrammingTest do
 		Map.put(data,:possible,((data[:i1] + data[:r1]) >= 100))
   end
 
-	@tag timeout: 300000
-	test "Numerical Boolean decision" do
-		#dset = make_dset(&numclassifier/1)
-		exp = GenProg.infer(dset3, :possible, [{:pop_size,50},{:thres,1.0}])
-		#:io.format("Num: ~p~n",[Epagoge.Exp.pp(exp)])
-		check(exp,:possible,&numclassifier/1)
-	end
+#	@tag timeout: 300000
+#	test "Numerical Boolean decision" do
+#		#dset = make_dset(&numclassifier/1)
+#		exp = GenProg.infer(dset3, :possible, [{:pop_size,50},{:thres,1.0}])
+#		#:io.format("Num: ~p~n",[Epagoge.Exp.pp(exp)])
+#		check(exp,:possible,&numclassifier/1)
+#	end
 
 	defp simplenumclassifier(data) do
 		Map.put(data,:possible,data[:rlast1] >= 100)
