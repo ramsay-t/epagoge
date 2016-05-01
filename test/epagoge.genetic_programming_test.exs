@@ -56,6 +56,7 @@ defmodule Epagoge.GeneticProgrammingTest do
 												d = Map.put(d,:r1,:random.uniform(100))
 												d = Map.put(d,:r2,:random.uniform(100))
 												d = Map.put(d,:i1,:random.uniform(100))
+												d = Map.put(d,:rlast1,:random.uniform(100))
 												f.(d)
 										end)
 	end
@@ -128,22 +129,22 @@ defmodule Epagoge.GeneticProgrammingTest do
 	test "Numerical Boolean decision" do
 		#dset = make_dset(&numclassifier/1)
 		exp = GenProg.infer(dset3, :possible, [{:pop_size,50},{:thres,1.0}])
-		:io.format("Num: ~p~n",[Epagoge.Exp.pp(exp)])
+		#:io.format("Num: ~p~n",[Epagoge.Exp.pp(exp)])
 		check(exp,:possible,&numclassifier/1)
 	end
 
 	defp simplenumclassifier(data) do
-		Map.put(data,:possible,data[:rlast] >= 100)
+		Map.put(data,:possible,data[:rlast1] >= 100)
 	end
 	defp dset4() do
 		[
-		 %{rlast: 100, o1: "coke", possible: true},
-		 %{rlast: 120, o1: "coke", possible: true},
-		 %{rlast: 110, o1: "coke", possible: true},
-		 %{rlast: 100, o1: "pepsi", possible: true},
-		 %{rlast: 110, o1: "pepsi", possible: true},
-		 %{rlast: 90, o1: "coke", possible: false},
-		 %{rlast: 45, o1: "coke", possible: false}
+		 %{rlast1: 100, o1: "coke", possible: true},
+		 %{rlast1: 120, o1: "coke", possible: true},
+		 %{rlast1: 110, o1: "coke", possible: true},
+		 %{rlast1: 100, o1: "pepsi", possible: true},
+		 %{rlast1: 110, o1: "pepsi", possible: true},
+		 %{rlast1: 90, o1: "coke", possible: false},
+		 %{rlast1: 45, o1: "coke", possible: false}
 		]
 	end
 
@@ -151,8 +152,8 @@ defmodule Epagoge.GeneticProgrammingTest do
 	test "Simple Numerical Boolean decision" do
 		#dset = make_dset(&numclassifier/1)
 		exp = GenProg.infer(dset4, :possible, [{:pop_size,50},{:thres,1.0}])
-		:io.format("Simple Num: ~p~n",[Epagoge.Exp.pp(exp)])
-		#check(exp,:possible,&simplenumclassifier/1)
+		#:io.format("Simple Num: ~p~n",[Epagoge.Exp.pp(exp)])
+		check(exp,:possible,&simplenumclassifier/1)
 	end
 
 
