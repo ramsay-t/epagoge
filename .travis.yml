@@ -1,6 +1,7 @@
 language: erlang
 otp_release:
-   - 18
+   - 18.3
+   - 18.2
 before_install:
    - sudo apt-get update -qq
    - sudo apt-get install -y dos2unix
