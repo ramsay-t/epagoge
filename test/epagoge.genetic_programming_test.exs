@@ -107,6 +107,55 @@ defmodule Epagoge.GeneticProgrammingTest do
 		Map.put(data,:possible,((data[:i1] > 75) or (data[:r1] < 50)))
 	end
 
+	defp dset3 do
+		[
+		 %{r1: 50, i1: 50, o1: 100, possible: true},
+		 %{r1: 50, i1: 20, o1: 70, possible: false},
+		 %{r1: 90, i1: 10, o1: 100, possible: true},
+		 %{r1: 90, i1: 50, o1: 140, possible: true},
+		 %{r1: 20, i1: 20, o1: 40, possible: false},
+		 %{r1: 90, i1: 5, o1: 95, possible: false},
+		 %{r1: 5, i1: 90, o1: 95, possible: false},
+		 %{r1: 70, i1: 20, o1: 90, possible: false}
+		]
+	end
+
+	defp numclassifier(data) do
+		Map.put(data,:possible,((data[:i1] + data[:r1]) >= 100))
+  end
+
+	@tag timeout: 300000
+	test "Numerical Boolean decision" do
+		#dset = make_dset(&numclassifier/1)
+		exp = GenProg.infer(dset3, :possible, [{:pop_size,50},{:thres,1.0}])
+		:io.format("Num: ~p~n",[Epagoge.Exp.pp(exp)])
+		check(exp,:possible,&numclassifier/1)
+	end
+
+	defp simplenumclassifier(data) do
+		Map.put(data,:possible,data[:rlast] >= 100)
+	end
+	defp dset4() do
+		[
+		 %{rlast: 100, o1: "coke", possible: true},
+		 %{rlast: 120, o1: "coke", possible: true},
+		 %{rlast: 110, o1: "coke", possible: true},
+		 %{rlast: 100, o1: "pepsi", possible: true},
+		 %{rlast: 110, o1: "pepsi", possible: true},
+		 %{rlast: 90, o1: "coke", possible: false},
+		 %{rlast: 45, o1: "coke", possible: false}
+		]
+	end
+
+	@tag timeout: 300000
+	test "Simple Numerical Boolean decision" do
+		#dset = make_dset(&numclassifier/1)
+		exp = GenProg.infer(dset4, :possible, [{:pop_size,50},{:thres,1.0}])
+		:io.format("Simple Num: ~p~n",[Epagoge.Exp.pp(exp)])
+		#check(exp,:possible,&simplenumclassifier/1)
+	end
+
+
 #	@tag timeout: 300000
 #	test "Hard boolean decision" do
 #		dset = make_dset(&hardclassifier/1)

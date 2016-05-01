@@ -376,7 +376,10 @@ defmodule Epagoge.GeneticProgramming do
 		#:io.format("Add Op~n")
 		res = case op_type(e) do
 						:bool ->
-							add_op_detail(names,:bool,litrange,e)
+							case :random.uniform(2) do
+							 1 -> add_op_detail(names,:comp,litrange,e)
+							 2 -> add_op_detail(names,:bool,litrange,e)
+							end
 						:num ->
 							case :random.uniform(2) do
 							 1 -> add_op_detail(names,:comp,litrange,e)
