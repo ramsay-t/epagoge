@@ -8,7 +8,7 @@ defmodule Epagoge.Mixfile do
 		 name: "Epagoge",
 		 source_url: "https://github.com/ramsay-t/Epagoge",
 		 homepage_url: "https://github.com/ramsay-t/Epagoge",
-     test_coverage: [tool: Coverex.Task, log: :error],
+ #    test_coverage: [tool: Coverex.Task, log: :error],
      deps: deps]
   end
 
@@ -16,9 +16,10 @@ defmodule Epagoge.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :httpoison],
-		 env: [z3cmd: "/Users/ramsay/Z3-str/Z3-str.py"]
-		]
+  #  [applications: [:logger, :httpoison],
+#		 env: [z3cmd: "/Users/ramsay/Z3-str/Z3-str.py"]
+#		]
+		[]
   end
 
   # Dependencies can be Hex packages:
@@ -33,7 +34,7 @@ defmodule Epagoge.Mixfile do
   defp deps do
     [{:elgar, git: "https://github.com/ramsay-t/elgar", compile: "mkdir -p deps; ln -s ../../skel deps/skel; rebar compile"},
 		 {:skel, git: "https://github.com/ramsay-t/skel", app: false, override: true},
-		 {:coverex, "~> 1.0.0", only: :test},
+#		 {:coverex, "~> 1.0.0", only: :test},
 		 {:earmark, "~> 0.1", only: :dev},
 		 {:ex_doc, "~> 0.6", only: :dev}]
   end
