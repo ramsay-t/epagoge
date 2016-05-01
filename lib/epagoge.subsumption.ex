@@ -6,7 +6,7 @@ defmodule Epagoge.Subsumption do
 		true
 	end
 	def subsumes?(_,[]) do
-		# Conversley, anything restrictive can't subsume true
+		# Conversly, anything restrictive can't subsume true
 		false
 	end
 	def subsumes?(l,r) do
@@ -89,13 +89,15 @@ defmodule Epagoge.Subsumption do
 		false
 	end
 
-	#FIXME: this doesn't feel complete. I can imagine there might be 
-	#       a circumstance where you need both halves to subsume...
-	defp subsumes_case({:conj,l,r},{:conj,l2,r2}) do
+	# This is a subtle definition - it is not implication!
+	# and it might be over-accepting...
+	defp subsumes_case({:conj,l,r}=le,{:conj,l2,r2}=re) do
 		(subsumes_case(l,l2) and subsumes_case(l,r2))
 		or (subsumes_case(r,l2) and subsumes_case(r,r2))
 		or (subsumes_case(l,l2) and subsumes_case(r,r2))
 		or (subsumes_case(r,l2) and subsumes_case(l,r2))
+		or subsumes_case(l,re)
+		or subsumes_case(r,re)
 	end
 	defp subsumes_case({:conj,l,r},o) do
 		subsumes_case(l,o) and subsumes_case(r,o)

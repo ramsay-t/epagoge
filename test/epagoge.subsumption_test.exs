@@ -86,6 +86,28 @@ defmodule Epagoge.SubsumptionTest do
 																 },
 																 {:eq,{:v,:r1},{:v,:r2}}) == false
 
+		assert Subsumption.subsumes?({:conj,
+																	{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:n},{:lit,"n"}}},
+																 {:conj,
+																	{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:i2},{:lit,2}},
+																	{:eq,{:v,:n},{:lit,"n"}}}) == true
+
+		assert Subsumption.subsumes?({:conj,
+																	{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:n},{:lit,"n"}}},
+																 {:conj,
+																	{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:n},{:lit,"n"}},
+																	{:eq,{:v,:i2},{:lit,2}}}) == true
+
+		assert Subsumption.subsumes?([{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:n},{:lit,"n"}}],
+																 [{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:i2},{:lit,2}},
+																	{:eq,{:v,:n},{:lit,"n"}}]) == true
+
 	end
 
 	test "Subsumption of numerics" do
