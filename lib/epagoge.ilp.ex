@@ -198,6 +198,16 @@ defmodule Epagoge.ILP do
 	def simplify_step({:eq,{:v,x},{:v,x}}) do
 		{:lit,true}
 	end
+	def simplify_step({:ne,{:v,x},{:v,x}}) do
+		{:lit,false}
+	end
+	def simplify_step({:ne,{:lit,x},{:lit,x}}) do
+		{:lit,false}
+	end
+	def simplify_step({:ne,{:lit,_x},{:lit,_y}}) do
+		{:lit,true}
+	end
+
 	def simplify_step({:nt,{:eq,l,r}}) do
 		{:ne,l,r}
 	end

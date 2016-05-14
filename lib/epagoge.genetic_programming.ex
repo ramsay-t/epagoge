@@ -70,6 +70,7 @@ defmodule Epagoge.GeneticProgramming do
 
 	# Fitness
 	defp num_fitness(dataset,target,exp) do
+#		:io.format("~p~n",[Exp.pp(exp)])
 		len = length(dataset)
 		difftotal = List.foldl(dataset,
 											 0,
@@ -362,28 +363,27 @@ defmodule Epagoge.GeneticProgramming do
 		]
 	end
 
-	defp add_op_detail(names,optype,litrange,e) do
-		case :random.uniform(2) do
-			1 ->
-				ILP.simplify({pick_op(optype),e,pick_val(names,litrange)})
-			2 ->
-				ILP.simplify({pick_op(optype),pick_val(names,litrange),e})
+	defp add_op_to_symbol(names,litrange,e) do
+		case :random.uniform(6) do
+			1 -> ILP.simplify({pick_op(:comp),e,pick_val(names,litrange)})
+			2 -> ILP.simplify({pick_op(:comp),pick_val(names,litrange),e})
+			3 -> ILP.simplify({pick_op(:arith),e,pick_val(names,litrange)})
+			4 -> ILP.simplify({pick_op(:arith),pick_val(names,litrange),e})
+			5 -> ILP.simplify({pick_op(:bool),e,pick_val(names,litrange)})
+			6 -> ILP.simplify({pick_op(:bool),pick_val(names,litrange),e})
 		end
 	end
-	
 	# Add an operator and a random value
 	defp bool_add_op(names,litrange,e) do
-		#:io.format("Add Op~n")
-		res = case op_type(e) do
-						:bool ->
-							case :random.uniform(2) do
-							 1 -> add_op_detail(names,:comp,litrange,e)
-							 2 -> add_op_detail(names,:bool,litrange,e)
-							end
-						:num ->
-							case :random.uniform(2) do
-							 1 -> add_op_detail(names,:comp,litrange,e)
-							 2 -> add_op_detail(names,:arith,litrange,e)
+		res = case e do
+						{:lit,_} -> add_op_to_symbol(names,litrange,e)
+						{:v,_} -> add_op_to_symbol(names,litrange,e)
+						_ ->
+							case :random.uniform(4) do
+								1 -> ILP.simplify({pick_op(:comp),e,pick_val(names,litrange)})
+								2 -> ILP.simplify({pick_op(:comp),pick_val(names,litrange),e})
+								3 -> ILP.simplify({pick_op(:bool),e,pick_val(names,litrange)})
+								4 -> ILP.simplify({pick_op(:bool),pick_val(names,litrange),e})
 							end
 					end
 		if is_sensible?(res) do
@@ -395,10 +395,15 @@ defmodule Epagoge.GeneticProgramming do
 	end
 
 	defp num_add_op(names,litrange,e) do
-		add_op_detail(names,:arith,litrange,e)
+		case :random.uniform(2) do
+			1 ->
+				ILP.simplify({pick_op(:arith),e,pick_val(names,litrange)})
+			2 ->
+				ILP.simplify({pick_op(:arith),pick_val(names,litrange),e})
+		end
 	end
 
-	defp bool_mod_op({op,l,r}) do
+	defp bool_mod_op(names,litrange,{op,l,r}) do
 		#:io.format("Mod Op~n")
 		if not is_sensible?({op,l,r}) do
 			# This should not have been created, but going round an endless loop is worse...
