@@ -1,18 +1,18 @@
 defmodule Epagoge.ILPTest do
   use ExUnit.Case
 	alias Epagoge.ILP, as: ILP
-	alias Epagoge.Exp, as: Exp
+#	alias Epagoge.Exp, as: Exp
 
-	defp p1 do
-		{:conj,{:lt,{:v,:r1},{:lit,"6"}},{:gr,{:v,:r2},{:lit,"9"}}}
-	end
+#	defp p1 do
+#		{:conj,{:lt,{:v,:r1},{:lit,"6"}},{:gr,{:v,:r2},{:lit,"9"}}}
+#	end
 
-	defp p2 do
-		{:disj,
-		 {:conj,{:lt,{:v,:r1},{:lit,"4"}},{:gr,{:v,:r2},{:lit,"3"}}},
-		 {:conj,{:lt,{:v,:r1},{:lit,"2"}},{:gr,{:v,:r2},{:lit,"11"}}}
-		}
-	end
+#	defp p2 do
+#		{:disj,
+#		 {:conj,{:lt,{:v,:r1},{:lit,"4"}},{:gr,{:v,:r2},{:lit,"3"}}},
+#		 {:conj,{:lt,{:v,:r1},{:lit,"2"}},{:gr,{:v,:r2},{:lit,"11"}}}
+#		}
+#	end
 
 	#test "Numeric generalisation" do
 	#	:io.format("~p~n~p~n",[Exp.pp(p1),Exp.pp(p2)])

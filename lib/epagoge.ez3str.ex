@@ -1,12 +1,12 @@
 defmodule Epagoge.EZ3Str do
 	def runZ3Str(statementstring) do
 		z3cmd = Application.get_env(:epagoge, :z3cmd)
-		case Application.get_env(:epagoge, :tmp) do
-			nil ->
-				tmpfolder = System.tmp_dir()
-			tf ->
-				tmpfolder = tf
-		end
+		tmpfolder = case Application.get_env(:epagoge, :tmp) do
+									nil ->
+										System.tmp_dir()
+									tf ->
+										tf
+								end
 		tfile = Path.join([tmpfolder,"athena_z3_str.z3str"])
 		File.write(tfile, statementstring)
 		{result,exitval} = System.cmd(z3cmd,["-f",tfile],[])
