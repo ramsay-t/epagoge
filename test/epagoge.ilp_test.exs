@@ -92,6 +92,13 @@ defmodule Epagoge.ILPTest do
 		assert ILP.simplify({:divide, {:lit, 1}, {:lit, 2}}) == {:lit, 0.5} 
 	end
 
+	test "Non-numeric simplifications shouldn't break" do
+		assert ILP.simplify({:plus,{:lit,"1"},{:lit,"2"}}) == {:plus,{:lit,"1"},{:lit,"2"}}
+		assert ILP.simplify({:minus,{:lit,"1"},{:lit,"2"}}) == {:minus,{:lit,"1"},{:lit,"2"}}
+		assert ILP.simplify({:multiply,{:lit,"1"},{:lit,"2"}}) == {:multiply,{:lit,"1"},{:lit,"2"}}
+		assert ILP.simplify({:divide,{:lit,"1"},{:lit,"2"}}) == {:divide,{:lit,"1"},{:lit,"2"}}
+	end
+
 	test "Inverse" do
 		assert ILP.inverse({:lit, false}) == {:lit, true}
 		assert ILP.inverse({:lit, true}) == {:lit, false}

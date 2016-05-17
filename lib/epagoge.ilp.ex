@@ -163,17 +163,33 @@ defmodule Epagoge.ILP do
 	end
 
 	# All-literal expressions can be simplified
-	def simplify_step({:plus,{:lit,x},{:lit,y}}) do
-		{:lit, x+y}
+	def simplify_step({:plus,{:lit,x},{:lit,y}}=orig) do
+		if (is_integer(x) or is_float(x)) and (is_integer(y) or is_float(y)) do
+			{:lit, x+y}
+		else
+			orig
+		end
 	end
-	def simplify_step({:minus,{:lit,x},{:lit,y}}) do
-		{:lit, x-y}
+	def simplify_step({:minus,{:lit,x},{:lit,y}}=orig) do
+		if (is_integer(x) or is_float(x)) and (is_integer(y) or is_float(y)) do
+			{:lit, x-y}
+		else
+			orig
+		end
 	end
-	def simplify_step({:multiply,{:lit,x},{:lit,y}}) do
-		{:lit, x*y}
+	def simplify_step({:multiply,{:lit,x},{:lit,y}}=orig) do
+		if (is_integer(x) or is_float(x)) and (is_integer(y) or is_float(y)) do
+			{:lit, x*y}
+		else
+			orig
+		end
 	end
-	def simplify_step({:divide,{:lit,x},{:lit,y}}) do
-		{:lit, x/y}
+	def simplify_step({:divide,{:lit,x},{:lit,y}}=orig) do
+		if (is_integer(x) or is_float(x)) and (is_integer(y) or is_float(y)) do
+			{:lit, x/y}
+		else
+			orig
+		end
 	end
 
 	def simplify_step({:lt,{:lit,x},{:lit,y}}) do
