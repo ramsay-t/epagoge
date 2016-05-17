@@ -85,4 +85,23 @@ defmodule Epagoge.ILPTest do
 								 }
 	end
 
+	test "Literal simplifications" do
+		assert ILP.simplify({:plus, {:lit, 1}, {:lit, 2}}) == {:lit, 3} 
+		assert ILP.simplify({:minus, {:lit, 1}, {:lit, 2}}) == {:lit, -1} 
+		assert ILP.simplify({:multiply, {:lit, 1}, {:lit, 2}}) == {:lit, 2} 
+		assert ILP.simplify({:divide, {:lit, 1}, {:lit, 2}}) == {:lit, 0.5} 
+	end
+
+	test "Inverse" do
+		assert ILP.inverse({:lit, false}) == {:lit, true}
+		assert ILP.inverse({:lit, true}) == {:lit, false}
+		assert ILP.inverse({:nt, {:v, :r1}}) == {:v, :r1}
+		assert ILP.inverse({:v, :r1}) == {:nt,{:v, :r1}}
+	end
+
+	test "Some conjunctive and disjunctive simplifications" do
+		assert ILP.simplify({:conj,{:v,:r1},{:nt,{:v,:r1}}}) == {:lit, true}
+		assert ILP.simplify({:conj,{:eq,{:lit,"beer"},{:v,:r1}},{:ne,{:v,:r1},{:lit,"beer"}}}) == {:lit, true}
+	end
+
 end

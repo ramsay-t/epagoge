@@ -162,6 +162,20 @@ defmodule Epagoge.ILP do
 		x
 	end
 
+	# All-literal expressions can be simplified
+	def simplify_step({:plus,{:lit,x},{:lit,y}}) do
+		{:lit, x+y}
+	end
+	def simplify_step({:minus,{:lit,x},{:lit,y}}) do
+		{:lit, x-y}
+	end
+	def simplify_step({:multiply,{:lit,x},{:lit,y}}) do
+		{:lit, x*y}
+	end
+	def simplify_step({:divide,{:lit,x},{:lit,y}}) do
+		{:lit, x/y}
+	end
+
 	def simplify_step({:lt,{:lit,x},{:lit,y}}) do
 		{:lit,x < y}
 	end
@@ -234,8 +248,8 @@ defmodule Epagoge.ILP do
 	end
 	
 	# Move variables left...
-	def simplify_step({:eq,{:lit,v},{:v,x}}) do
-		{:eq,{:v,x},{:lit,v}}
+	def simplify_step({:eq,v,{:v,x}}) do
+		{:eq,{:v,x},v}
 	end
 
 
@@ -272,7 +286,6 @@ defmodule Epagoge.ILP do
 		{:lit,false}
 	end
 
-
 	def simplify_step({:ne,{lop,ll,lr},{rop,rl,rr}}) when (lop == :eq or lop == :ne) and (rop == :eq or rop == :ne) do
 		l = simplify({:conj,simplify({lop,ll,lr}),simplify({:nt,{rop,rl,rr}})})
 		r = simplify({:conj,simplify({:nt,{lop,ll,lr}}),simplify({rop,rl,rr})})
@@ -288,7 +301,16 @@ defmodule Epagoge.ILP do
 		else if Subs.subsumes?(sr,sl) do
 					 sr
 				 else
-					 {:conj,sl,sr}
+					 # Some more subtle conjunction and disjunction simplifications 
+					 # These require more computing, so might be best removed for something 
+					 # intense like GP?
+
+					 # Inverse might be easier to calculate one way or the other
+					 if sl == inverse(sr) or sr == inverse(sl) do
+						 {:lit, true}
+					 else
+						 {:conj,sl,sr}
+					 end
 				 end
 		end
 	end
@@ -328,6 +350,49 @@ defmodule Epagoge.ILP do
 	end
 	defp conj_to_list(e) do
 		[e]
+	end
+
+	# Compute inverse if possible?
+	def inverse({:lit,true}) do
+		{:lit, false}
+	end
+	def inverse({:lit, false}) do
+		{:lit, true}
+	end
+	def inverse({:ge,x,y}) do
+		{:lt,x,y}
+	end
+	def inverse({:gt,x,y}) do
+		{:le,x,y}
+	end
+	def inverse({:le,x,y}) do
+		{:gt,x,y}
+	end
+	def inverse({:lt,x,y}) do
+		{:ge,x,y}
+	end
+	def inverse({:eq,x,y}) do
+		{:ne,x,y}
+	end
+	def inverse({:ne,x,y}) do
+		{:eq,x,y}
+	end
+	def inverse({:nt,x}) do
+		x
+	end
+	def inverse({:conj,x,y}) do
+		nx = simplify({:nt,x})
+		ny = simplify({:nt,y})
+		{:disj,nx,ny}
+	end
+	def inverse({:conj,x,y}) do
+		nx = simplify({:nt,x})
+		ny = simplify({:nt,y})
+		{:conj,nx,ny}
+	end
+	def inverse(x) do
+		# This is not very imaginative...
+		{:nt, x}
 	end
 
 end
