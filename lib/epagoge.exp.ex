@@ -43,25 +43,25 @@ defmodule Epagoge.Exp do
 	# Comparison of numerics
 	def eval({:gr,l,r},bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv > rv,bind}
 		end
 	end
 	def eval({:ge,l,r},bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv >= rv,bind}
 		end
 	end
 	def eval({:lt,l,r},bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv < rv,bind}
 		end
 	end
 	def eval({:le,l,r},bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv <= rv,bind}
 		end
 	end
@@ -75,25 +75,25 @@ defmodule Epagoge.Exp do
 	# Arithmatic
 	def eval({:plus,l,r}, bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv + rv,bind}
 		end
 	end
 	def eval({:minus,l,r}, bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv - rv,bind}
 		end
 	end
 	def eval({:multiply,l,r}, bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> {lv * rv,bind}
 		end
 	end
 	def eval({:divide,l,r}, bind) do
 		case make_numbers(l,r,bind) do
-			false -> {false,bind}
+			false -> {:undefined,bind}
 			{lv,rv} -> 
 				if rv == 0 do
 					raise "Divide by zero"
@@ -210,7 +210,7 @@ defmodule Epagoge.Exp do
 	
 	# Helper functions
 	defp make_numbers(l,r,bind) do
-				case make_number(l,bind) do
+		case make_number(l,bind) do
 			false ->
 				false
 			lv ->

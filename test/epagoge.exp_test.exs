@@ -49,10 +49,10 @@ defmodule Epagoge.ExpTest do
 	end
 
 	test "Comparison not defined over strings" do
-		assert Exp.eval({:gr,{:lit,"coke"},{:lit,"coke"}},bind1) == {false,bind1}
-		assert Exp.eval({:ge,{:lit,"coke"},{:lit,"coke"}},bind1) == {false,bind1}
-		assert Exp.eval({:lt,{:lit,"coke"},{:lit,"coke"}},bind1) == {false,bind1}
-		assert Exp.eval({:le,{:lit,"coke"},{:lit,"coke"}},bind1) == {false,bind1}
+		assert Exp.eval({:gr,{:lit,"coke"},{:lit,"coke"}},bind1) == {:undefined,bind1}
+		assert Exp.eval({:ge,{:lit,"coke"},{:lit,"coke"}},bind1) == {:undefined,bind1}
+		assert Exp.eval({:lt,{:lit,"coke"},{:lit,"coke"}},bind1) == {:undefined,bind1}
+		assert Exp.eval({:le,{:lit,"coke"},{:lit,"coke"}},bind1) == {:undefined,bind1}
 	end
 
 	test "Assignment" do
@@ -91,7 +91,7 @@ defmodule Epagoge.ExpTest do
 	end
 
 	test "Arithmetic over unknowns" do
-		assert Exp.eval({:plus,{:v,:r1},{:v,:i1}},%{:r1 => 4, :x1 => 6}) == {false,%{:r1 => 4, :x1 => 6}}
+		assert Exp.eval({:plus,{:v,:r1},{:v,:i1}},%{:r1 => 4, :x1 => 6}) == {:undefined,%{:r1 => 4, :x1 => 6}}
 	end
 
 	test "String concatenation" do
@@ -152,6 +152,18 @@ defmodule Epagoge.ExpTest do
 		assert Exp.freevars({:conj,{:nt,{:v,:r1}},{:lt,{:v,:r2},{:v,:r3}}}) == [:r1,:r2,:r3]
 		assert Exp.freevars({:eq, {:v, :i1}, {:lit, "coke"}}) == [:i1]
 		assert Exp.freevars({:assign, :o1, {:lit, "coke"}}) == [:o1]
+	end
+
+	test "Aritmetic undefined over boolean" do
+		assert Exp.eval({:multiply, {:lit, false}, {:lit, false}},%{}) == {:undefined,%{}}
+		assert Exp.eval({:divide, {:lit, false}, {:lit, false}},%{}) == {:undefined,%{}}
+		assert Exp.eval({:plus, {:lit, false}, {:lit, false}},%{}) == {:undefined,%{}}
+		assert Exp.eval({:minus, {:lit, false}, {:lit, false}},%{}) == {:undefined,%{}}
+
+		assert Exp.eval({:multiply, {:v, :r1}, {:v, :r2}},%{r1: false, r2: false}) == {:undefined,%{r1: false, r2: false}}
+		assert Exp.eval({:divide, {:v, :r1}, {:v, :r2}},%{r1: false, r2: false}) == {:undefined,%{r1: false, r2: false}}
+		assert Exp.eval({:plus, {:v, :r1}, {:v, :r2}},%{r1: false, r2: false}) == {:undefined,%{r1: false, r2: false}}
+		assert Exp.eval({:minus, {:v, :r1}, {:v, :r2}},%{r1: false, r2: false}) == {:undefined,%{r1: false, r2: false}}
 	end
 
 end
