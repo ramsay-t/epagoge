@@ -267,7 +267,9 @@ defmodule Epagoge.ILP do
 	def simplify_step({:eq,v,{:v,x}}) do
 		{:eq,{:v,x},v}
 	end
-
+	def simplify_step({:ne,v,{:v,x}}) do
+		{:ne,{:v,x},v}
+	end
 
 	def simplify_step({:disj,{:eq,l,r},{:ne,l,r}}) do
 		{:lit,true}
