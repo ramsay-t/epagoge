@@ -115,7 +115,6 @@ defmodule Epagoge.ILPTest do
 
 	test "Some things that have been known to be non-terminal..." do
 		ILP.simplify({:le,{:v,:i1},{:eq,{:v,:r2},{:v,:i1}}})
-		assert true
 	end
 
 end

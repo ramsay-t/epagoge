@@ -169,6 +169,10 @@ defmodule Epagoge.ExpTest do
 	test "Boolean expresions over undefined are undefined" do
 		assert Exp.eval({:nt,{:disj,{:lit,false},{:plus,{:lit,true},{:lit,true}}}},%{}) == {:undefined,%{}}
 		assert Exp.eval({:nt,{:conj,{:lit,true},{:plus,{:lit,true},{:lit,true}}}},%{}) == {:undefined,%{}}
+		# bizarrely, the elixir 'and' and 'or' operators work for when applied to (bool,atom)
+		# and return the atom, but they don't work when applied to (atom,bool)...
+		assert Exp.eval({:nt,{:disj,{:plus,{:lit,true},{:lit,true}},{:lit,false}}},%{}) == {:undefined,%{}}
+		assert Exp.eval({:nt,{:conj,{:plus,{:lit,true},{:lit,true}},{:lit,true}}},%{}) == {:undefined,%{}}
 	end
 
 end

@@ -16,21 +16,31 @@ defmodule Epagoge.Exp do
 		end
 	end
 	def eval({:nt,r},bind) do
-		{rv,_} = eval(r,bind)
-		{not rv,bind}
+		case eval(r,bind) do
+			{:undefined,_} -> {:undefined,bind}
+			{rv,_} -> {not rv,bind}
+		end
 	end
 	def eval({:ne,l,r},bind) do
 		eval({:nt,{:eq,l,r}},bind)
 	end
 	def eval({:conj,l,r},bind) do
-		{lv,_} = eval(l,bind)
-		{rv,_} = eval(r,bind)
-		{lv and rv,bind}
+		case eval(l,bind) do
+			{:undefined,_} -> {:undefined,bind}
+			{lv,_} ->	
+				# bizarrely, the elixir 'and' and 'or' operators work for when applied to (bool,atom)
+				{rv,_} = eval(r,bind)
+				{lv and rv,bind}
+		end
 	end
 	def eval({:disj,l,r},bind) do
-		{lv,_} = eval(l,bind)
-		{rv,_} = eval(r,bind)
-		{lv or rv,bind}
+		case eval(l,bind) do
+			{:undefined,_} -> {:undefined,bind}
+			{lv,_} ->	
+				# bizarrely, the elixir 'and' and 'or' operators work for when applied to (bool,atom)
+				{rv,_} = eval(r,bind)
+				{lv or rv,bind}
+		end
 	end
 	# Variables and literals
 	def eval({:v,name},bind) do
