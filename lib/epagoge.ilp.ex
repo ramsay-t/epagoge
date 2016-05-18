@@ -54,11 +54,12 @@ defmodule Epagoge.ILP do
   It might in the future.
   """
 	def simplify(e) do
-		if is_list(e) do
-			conj_to_list(simplify_step(NF.cnf(list_to_conj(e))))
-		else 
-			simplify_step(NF.cnf(e))
-		end
+		r = if is_list(e) do
+					conj_to_list(simplify_step(NF.cnf(list_to_conj(e))))
+				else 
+					simplify_step(NF.cnf(e))
+				end
+		r
 	end
 
 	def simplify_step({:get,"","",v}) do
@@ -119,7 +120,7 @@ defmodule Epagoge.ILP do
 		end
 	end
 	def simplify_step({:conj,l,{:match,pre,suf,tgt}}) do
-		simplify_step({:conj,{:match,pre,suf,tgt},l})
+		simplify({:conj,{:match,pre,suf,tgt},l})
 	end
 	def simplify_step({:conj,l,{:conj,_,_}=r}) do
 		sl = simplify(l)
@@ -186,7 +187,11 @@ defmodule Epagoge.ILP do
 	end
 	def simplify_step({:divide,{:lit,x},{:lit,y}}=orig) do
 		if (is_integer(x) or is_float(x)) and (is_integer(y) or is_float(y)) do
-			{:lit, x/y}
+			if y == 0 or y == 0.0 do
+				:undefined
+			else
+				{:lit, x/y}
+			end
 		else
 			orig
 		end
@@ -264,6 +269,13 @@ defmodule Epagoge.ILP do
 	end
 	
 	# Move variables left...
+	# Unless they are both variables!
+	def simplify_step({:eq,{:v,l},{:v,r}}=orig) do
+		orig
+	end
+	def simplify_step({:ne,{:v,l},{:v,r}}=orig) do
+		orig
+	end
 	def simplify_step({:eq,v,{:v,x}}) do
 		{:eq,{:v,x},v}
 	end
@@ -277,14 +289,13 @@ defmodule Epagoge.ILP do
 	def simplify_step({:disj,{:ne,l,r},{:eq,l,r}}) do
 		{:lit,true}
 	end
-
 	def simplify_step({:conj,{:eq,x,v},{:eq,x,v}}) do
 		simplify({:eq,x,v})
 	end
 	def simplify_step({:conj,{:eq,x,{:lit,_v}},{:eq,x,{:lit,_o}}}) do
 		{:lit,false}
 	end
-	
+
 	def simplify_step({:disj,x,{:lit,false}}) do
 		simplify(x)
 	end
@@ -304,6 +315,8 @@ defmodule Epagoge.ILP do
 		{:lit,false}
 	end
 
+	# This catches the stupid things that GP comes up with:
+	# (r1 != \"wine\") != (r1 = \"beer\") -->> (r1 != \"wine\") ^ (r1 != \"beer\")
 	def simplify_step({:ne,{lop,ll,lr},{rop,rl,rr}}) when (lop == :eq or lop == :ne) and (rop == :eq or rop == :ne) do
 		l = simplify({:conj,simplify({lop,ll,lr}),simplify({:nt,{rop,rl,rr}})})
 		r = simplify({:conj,simplify({:nt,{lop,ll,lr}}),simplify({rop,rl,rr})})
@@ -311,6 +324,16 @@ defmodule Epagoge.ILP do
 	end
 
 	# Catch all others
+	def simplify_step({:disj,l,r}=orig) do
+		sl = simplify(l)
+		sr = simplify(r)
+		if (sl == inverse(sr)) or (sr == inverse(sl)) do
+			{:lit, true}
+		else
+			orig
+		end
+	end
+
 	def simplify_step({:conj,l,r}) do
 		sl = simplify(l)
 		sr = simplify(r)
@@ -325,21 +348,19 @@ defmodule Epagoge.ILP do
 
 					 # Inverse might be easier to calculate one way or the other
 					 if sl == inverse(sr) or sr == inverse(sl) do
-						 {:lit, true}
+						 {:lit, false}
 					 else
 						 {:conj,sl,sr}
 					 end
-				 end
+         end
 		end
 	end
 
 	def simplify_step({op,l,r}) do
-		#:io.format("Simplifying ~p... ",[Exp.pp({op,l,r})])
-		sl = simplify_step(l)
-		sr = simplify_step(r)
-		#:io.format(" got ~p~n",[Exp.pp({op,sl,sr})])
+		sl = simplify(l)
+		sr = simplify(r)
 		if {op,sl,sr} != {op,l,r} do
-			simplify_step({op,sl,sr})
+			simplify({op,sl,sr})
 		else
 			{op,l,r}
 		end
@@ -403,7 +424,7 @@ defmodule Epagoge.ILP do
 		ny = simplify({:nt,y})
 		{:disj,nx,ny}
 	end
-	def inverse({:conj,x,y}) do
+	def inverse({:disj,x,y}) do
 		nx = simplify({:nt,x})
 		ny = simplify({:nt,y})
 		{:conj,nx,ny}

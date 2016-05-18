@@ -166,4 +166,9 @@ defmodule Epagoge.ExpTest do
 		assert Exp.eval({:minus, {:v, :r1}, {:v, :r2}},%{r1: false, r2: false}) == {:undefined,%{r1: false, r2: false}}
 	end
 
+	test "Boolean expresions over undefined are undefined" do
+		assert Exp.eval({:nt,{:disj,{:lit,false},{:plus,{:lit,true},{:lit,true}}}},%{}) == {:undefined,%{}}
+		assert Exp.eval({:nt,{:conj,{:lit,true},{:plus,{:lit,true},{:lit,true}}}},%{}) == {:undefined,%{}}
+	end
+
 end

@@ -82,7 +82,7 @@ defmodule Epagoge.GeneticProgrammingTest do
 	@tag timeout: 300000
 	test "More complex calc" do
 		dset = make_dset(&calc/1)
-		exp = GenProg.infer(dset, :o1,[{:pop_size,60},{:thres,1.0}])
+		exp = GenProg.infer(dset, :o1,[{:pop_size,40},{:thres,1.0}])
 		#:io.format("For (r1 + r2) / i1, Made: ~p~n",[Exp.pp(exp)])
 		check(exp,:o1,&calc/1)
 	end
@@ -94,7 +94,7 @@ defmodule Epagoge.GeneticProgrammingTest do
 	@tag timeout: 300000
 	test "Boolean decision" do
 		dset = make_dset(&classifier1/1)
-		exp = GenProg.infer(dset, :possible, [{:pop_size,60},{:thres,1.0}])
+		exp = GenProg.infer(dset, :possible, [{:pop_size,30},{:thres,1.0},{:monitor,:any}])
 		av = Enum.sum(Enum.map(dset, fn(data) -> 
 														{comp,_newdata} = Exp.eval(exp,data) 
 														if comp == data[:possible] do 0 else 1 end

@@ -107,8 +107,15 @@ defmodule Epagoge.ILPTest do
 	end
 
 	test "Some conjunctive and disjunctive simplifications" do
-		assert ILP.simplify({:conj,{:v,:r1},{:nt,{:v,:r1}}}) == {:lit, true}
-		assert ILP.simplify({:conj,{:eq,{:lit,"beer"},{:v,:r1}},{:ne,{:v,:r1},{:lit,"beer"}}}) == {:lit, true}
+		assert ILP.simplify({:conj,{:v,:r1},{:nt,{:v,:r1}}}) == {:lit, false}
+		assert ILP.simplify({:disj,{:v,:r1},{:nt,{:v,:r1}}}) == {:lit, true}
+		assert ILP.simplify({:conj,{:eq,{:lit,"beer"},{:v,:r1}},{:ne,{:v,:r1},{:lit,"beer"}}}) == {:lit, false}
+		assert ILP.simplify({:disj,{:eq,{:lit,"beer"},{:v,:r1}},{:ne,{:v,:r1},{:lit,"beer"}}}) == {:lit, true}
+	end
+
+	test "Some things that have been known to be non-terminal..." do
+		ILP.simplify({:le,{:v,:i1},{:eq,{:v,:r2},{:v,:i1}}})
+		assert true
 	end
 
 end

@@ -256,6 +256,13 @@ defmodule Epagoge.Exp do
 	end
 
   # String representations
+	def pp([]) do
+		""
+	end
+	def pp([_ | _]=es) do
+		"[" <> Enum.join(Enum.map(es, &pp/1),",") <> "]"
+	end
+
 	def pp({:lit,v}) do
 		if String.valid?(v) do
 			"\"" <> v <> "\""

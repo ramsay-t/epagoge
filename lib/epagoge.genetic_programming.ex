@@ -208,6 +208,7 @@ defmodule Epagoge.GeneticProgramming do
 	# Currently this makes no attempt to detrmine type...
 	# In fact, currently they are all numeric...
 	defp pick_op(type) do
+		#:io.format("Pick op ~p~n",[type])
 		ops = case type do
 						:arith -> [:plus,:minus,:divide,:multiply]
 						:comp -> [:gr,:ge,:lt,:le,:ne,:eq]
@@ -260,6 +261,7 @@ defmodule Epagoge.GeneticProgramming do
 
 	# Crossover
 	defp bool_crossover({op,l,r},e2) do
+		#:io.format("X: ~n~p~n~p~n~n",[Exp.pp({op,l,r}),Exp.pp(e2)])
 		res = case :random.uniform(3) do
 						1 -> {op,get_subexp(e2),r}
 						2 -> {op,l,get_subexp(e2)}
@@ -364,6 +366,7 @@ defmodule Epagoge.GeneticProgramming do
 	end
 
 	defp add_op_to_symbol(names,litrange,e) do
+		#:io.format("Add op to symbol ~p~n",[Exp.pp(e)])
 		case :random.uniform(6) do
 			1 -> ILP.simplify({pick_op(:comp),e,pick_val(names,litrange)})
 			2 -> ILP.simplify({pick_op(:comp),pick_val(names,litrange),e})
@@ -375,6 +378,7 @@ defmodule Epagoge.GeneticProgramming do
 	end
 	# Add an operator and a random value
 	defp bool_add_op(names,litrange,e) do
+		#:io.format("Add Op ~p~n",[Exp.pp(e)])
 		res = case e do
 						{:lit,_} -> add_op_to_symbol(names,litrange,e)
 						{:v,_} -> add_op_to_symbol(names,litrange,e)
@@ -403,31 +407,26 @@ defmodule Epagoge.GeneticProgramming do
 		end
 	end
 
-	defp bool_mod_op(names,litrange,{op,l,r}) do
+	defp bool_mod_op({op,l,r}) do
 		#:io.format("Mod Op~n")
-		if not is_sensible?({op,l,r}) do
-			# This should not have been created, but going round an endless loop is worse...
-			{op,l,r}
+		res = case :random.uniform(3) do
+						1 -> {op,bool_mod_op(l),r}
+						2 -> {op,l,bool_mod_op(r)}
+						3 -> case op_type({op,l,r}) do
+									 :bool ->
+										 {pick_op(:bool),l,r}
+									 :num ->
+										 case :random.uniform(2) do
+											 1 -> {pick_op(:arith),l,r}
+											 2 -> {pick_op(:comp),l,r}
+										 end
+								 end
+					end
+		res = ILP.simplify(res)
+		if is_sensible?(res) and (res != {op,l,r}) do
+			res
 		else
-			res = case :random.uniform(3) do
-							1 -> {op,bool_mod_op(l),r}
-							2 -> {op,l,bool_mod_op(r)}
-							3 -> case op_type({op,l,r}) do
-										 :bool ->
-											 {pick_op(:bool),l,r}
-										 :num ->
-											 case :random.uniform(2) do
-												 1 -> {pick_op(:arith),l,r}
-												 2 -> {pick_op(:comp),l,r}
-											 end
-									 end
-						end
-			res = ILP.simplify(res)
-			if is_sensible?(res) and (res != {op,l,r}) do
-				res
-			else
-				bool_mod_op({op,l,r})
-			end
+			bool_mod_op({op,l,r})
 		end
 	end
 	defp bool_mod_op(e) do
@@ -525,7 +524,7 @@ defmodule Epagoge.GeneticProgramming do
 		if is_sensible?(res) and (res != {op,l,r}) do
 			res
 		else
-			#split(type,names,litrange,{op,l,r})
+			#bool_split(names,litrange,{op,l,r})
 			{op,l,r}
 		end
 	end
