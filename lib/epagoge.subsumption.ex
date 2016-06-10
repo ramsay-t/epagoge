@@ -1,6 +1,21 @@
 defmodule Epagoge.Subsumption do
+	@moduledoc """
+  Subsumption defines a partial ordering for expressions where P subsumes Q if it makes sense to consider
+  Q to be an 'instance of' the more general statement made by P. 
+
+  This is often the inverse of implication, so if Q -> P then P subsumes Q. For example, x > 3 subsumes x = 4.
+
+  However, it also includes other generalisations. Specifically, variables always subsume literals, so
+  x = r1 subsumes x = 4. This is important for many of the applications of subsumption that want to 
+  produce statements that accept more possibilities, but it means that you cannot use subsumption as
+  the inverse of implication.
+  """
+
 	alias Epagoge.Exp, as: Exp
 
+	@doc """
+  The subsumes? predicate computes whether the first parameter subsumes the second parameter.
+   """
 	def subsumes?([],_r) do
 		# Emptylist can be read as "no restrictions", so it is just 'true' and subsumes everything
 		true
@@ -25,9 +40,12 @@ defmodule Epagoge.Subsumption do
 	end
 
 	# Variable subsumption
+	# Variables are more general than values
+	# This is an example of subsumption not always being the inverse of implication!
 	defp subsumes_case({:v,_},{:lit,_}) do
 		true
 	end
+
 	defp subsumes_case({:v,lname},{:v,rname}) do
 		lname == rname
 	end
@@ -35,8 +53,11 @@ defmodule Epagoge.Subsumption do
 		l1 == l2
 	end
 
+	# FIXME: should this be commutative?
 	defp subsumes_case({:eq,ll,lr},{:eq,rl,rr}) do
-		subsumes_case(ll,rl) and subsumes_case(lr,rr)
+		(subsumes_case(ll,rl) and subsumes_case(lr,rr))
+		or
+		(subsumes_case(ll,rr) and subsumes_case(lr,rl))
 	end
 
   # Match expression subsuption
@@ -89,15 +110,12 @@ defmodule Epagoge.Subsumption do
 		false
 	end
 
-	# This is a subtle definition - it is not implication!
-	# and it might be over-accepting...
+	# Since subsumption is a matter of generalisation, if we take the
+	# two halves of the conjunction and they each subsume the 
+	# right hand expression then there are no contradictions 
+	# and we can accept the total subsumption..
 	defp subsumes_case({:conj,l,r}=le,{:conj,l2,r2}=re) do
-		(subsumes_case(l,l2) and subsumes_case(l,r2))
-		or (subsumes_case(r,l2) and subsumes_case(r,r2))
-		or (subsumes_case(l,l2) and subsumes_case(r,r2))
-		or (subsumes_case(r,l2) and subsumes_case(l,r2))
-		or subsumes_case(l,re)
-		or subsumes_case(r,re)
+		subsumes_case(l,re) and subsumes_case(r,re)
 	end
 	defp subsumes_case({:conj,l,r},o) do
 		subsumes_case(l,o) and subsumes_case(r,o)
@@ -106,59 +124,74 @@ defmodule Epagoge.Subsumption do
 		subsumes_case(o,l) or subsumes_case(o,r)
 	end
 
-	# Some numerics
-	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:ge,tgt,{:lit,gval}}) do
-		eqval >= gval
-	end
+	# Some numeric cases that get less restrictive
 	defp subsumes_case({:ge,tgt,{:lit,lval}},{:ge,tgt,{:lit,rval}}) do
 		lval <= rval
 	end
-	defp subsumes_case({:ge,_,_},{:eq,_,_}) do
-		false
+	defp subsumes_case({:ge,tgt,{:lit,lval}},{:eq,tgt,{:lit,eqval}}) do
+		eqval >= lval
 	end
-	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:le,tgt,{:lit,lval}}) do
-		eqval <= lval
-	end
+
 	defp subsumes_case({:le,tgt,{:lit,lval}},{:le,tgt,{:lit,rval}}) do
 		lval >= rval
 	end
-	defp subsumes_case({:le,_,_},{:eq,_,_}) do
-		false
-	end
-	defp subsumes_case({:le,_,_},{:ge,_,_}) do
-		false
-	end
-	defp subsumes_case({:ge,_,_},{:le,_,_}) do
-		false
+	defp subsumes_case({:le,tgt,{:lit,lval}},{:eq,tgt,{:lit,eqval}}) do
+		eqval <= lval
 	end
 
-	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:gt,tgt,{:lit,lval}}) do
+	defp subsumes_case({:gr,tgt,{:lit,lval}},{:gr,tgt,{:lit,rval}}) do
+		lval <= rval
+	end
+	defp subsumes_case({:gr,tgt,{:lit,lval}},{:eq,tgt,{:lit,eqval}}) do
 		eqval > lval
 	end
-	defp subsumes_case({:gt,tgt,{:lit,lval}},{:gt,tgt,{:lit,rval}}) do
-		lval >= rval
-	end
-	defp subsumes_case({:eq,tgt,{:lit,eqval}},{:lt,tgt,{:lit,lval}}) do
-		eqval < lval
-	end
+
 	defp subsumes_case({:lt,tgt,{:lit,lval}},{:lt,tgt,{:lit,rval}}) do
 		lval >= rval
+	end
+	defp subsumes_case({:lt,tgt,{:lit,lval}},{:eq,tgt,{:lit,eqval}}) do
+		eqval < lval
+	end
+	# In other cases we don't know how to check...
+
+
+
+	# Numeric generalisations
+	defp subsumes_case({:lt,v,{:lit,x}},{:eq,v,{:lit,y}}) do
+		y < x
 	end
 	defp subsumes_case({:lt,_,_},{:eq,_,_}) do
 		false
 	end
-	defp subsumes_case({:gt,_,_},{:eq,_,_}) do
+	defp subsumes_case({:gr,v,{:lit,x}},{:eq,v,{:lit,y}}) do
+		y > x
+	end
+	defp subsumes_case({:gr,_,_},{:eq,_,_}) do
 		false
 	end
-	defp subsumes_case({:lt,_,_},{:gt,_,_}) do
+	defp subsumes_case({:le,v,{:lit,x}},{:eq,v,{:lit,y}}) do
+		y <= x
+	end
+	defp subsumes_case({:le,_,_},{:eq,_,_}) do
 		false
 	end
-	defp subsumes_case({:gt,_,_},{:lt,_,_}) do
+	defp subsumes_case({:ge,v,{:lit,x}},{:eq,v,{:lit,y}}) do
+		y >= x
+	end
+	defp subsumes_case({:ge,_,_},{:eq,_,_}) do
+		false
+	end
+	
+
+	defp subsumes_case({:lt,_,_},{:gr,_,_}) do
+		false
+	end
+	defp subsumes_case({:gr,_,_},{:lt,_,_}) do
 		false
 	end
 	
 	# Mismatched targets or non-literal values
-	defp subsumes_case({:gt,_t1,_},{:gt,_t2,_}) do
+	defp subsumes_case({:gr,_t1,_},{:gr,_t2,_}) do
 		false
 	end
 	defp subsumes_case({:lt,_t1,_},{:lt,_t2,_}) do
@@ -180,7 +213,7 @@ defmodule Epagoge.Subsumption do
 	defp subsumes_case({:eq,_t1,_},{:ge,_t2,_}) do
 		false
 	end
-	defp subsumes_case({:eq,_t1,_},{:gt,_t2,_}) do
+	defp subsumes_case({:eq,_t1,_},{:gr,_t2,_}) do
 		false
 	end
 

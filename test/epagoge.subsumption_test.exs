@@ -15,7 +15,8 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},{:eq,{:lit,1},{:lit,2}}) == true
 		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},{:eq,{:v,:r1},{:lit,2}}) == true
 		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},{:eq,{:lit,1},{:v,:r2}}) == true
-		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},{:eq,{:lit,1},{:v,:r1}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},{:eq,{:lit,1},{:v,:r1}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:r1},{:v,:r2}},{:eq,{:v,:r3},{:v,:r1}}) == false
 	end
 
 	test "Subsumption between matches" do
@@ -55,7 +56,8 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:lit,1},{:lit,2}}]) == true
 		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:v,:r1},{:lit,2}}]) == true
 		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:lit,1},{:v,:r2}}]) == true
-		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:lit,1},{:v,:r1}}]) == false
+		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:lit,1},{:v,:r1}}]) == true
+		assert Subsumption.subsumes?([{:eq,{:v,:r1},{:v,:r2}}],[{:eq,{:v,:r3},{:v,:r1}}]) == false
 		assert Subsumption.subsumes?([
 																	{:eq,{:v,:r1},{:v,:r2}},
 																	{:eq,{:v,:r1},{:v,:r2}},
@@ -96,7 +98,7 @@ defmodule Epagoge.SubsumptionTest do
 																 {:conj,
 																	{:eq,{:v,:i1},{:lit,1}},
 																	{:eq,{:v,:n},{:lit,"n"}}
-																}) == true
+																}) == false
 		
 		assert Subsumption.subsumes?({:conj,
 																	{:eq,{:v,:i1},{:lit,1}},
@@ -115,32 +117,53 @@ defmodule Epagoge.SubsumptionTest do
 																	{:eq,{:v,:i2},{:lit,2}},
 																	{:eq,{:v,:n},{:lit,"n"}}]) == true
 
+		assert Subsumption.subsumes?([{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:i2},{:lit,2}},
+																	{:eq,{:v,:n},{:lit,"n"}}],
+																 [{:eq,{:v,:i1},{:lit,1}},
+																	{:eq,{:v,:n},{:lit,"n"}}]) == false
+
 	end
 
 	test "Subsumption of numerics" do
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,3}}) == true
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,4}}) == true
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,5}}) == false
-		assert Subsumption.subsumes?({:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+		assert Subsumption.subsumes?({:ge,{:v,:i1},{:lit,3}},{:eq,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:ge,{:v,:i1},{:lit,5}},{:eq,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,5}},{:ge,{:v,:i1},{:lit,5}}) == false
 
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:gt,{:v,:i1},{:lit,3}}) == true
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:gt,{:v,:i1},{:lit,4}}) == false
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:gt,{:v,:i1},{:lit,5}}) == false
-		assert Subsumption.subsumes?({:gt,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+		assert Subsumption.subsumes?({:gr,{:v,:i1},{:lit,3}},{:eq,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:gr,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:gr,{:v,:i1},{:lit,5}},{:eq,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,5}},{:gr,{:v,:i1},{:lit,4}}) == false
 
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,3}}) == false
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,4}}) == true
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,5}}) == true
-		assert Subsumption.subsumes?({:le,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+		assert Subsumption.subsumes?({:le,{:v,:i1},{:lit,3}},{:eq,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:le,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:le,{:v,:i1},{:lit,5}},{:eq,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,5}},{:le,{:v,:i1},{:lit,4}}) == false
 
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,3}}) == false
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,4}}) == false
-		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,5}}) == true
-		assert Subsumption.subsumes?({:lt,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,5}}) == false
+		assert Subsumption.subsumes?({:lt,{:v,:i1},{:lit,3}},{:eq,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:lt,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}) == false
+		assert Subsumption.subsumes?({:lt,{:v,:i1},{:lit,5}},{:eq,{:v,:i1},{:lit,4}}) == true
+		assert Subsumption.subsumes?({:eq,{:v,:i1},{:lit,5}},{:lt,{:v,:i1},{:lit,4}}) == false
+
+		assert Subsumption.subsumes?({:gr,{:v,:r1},{:lit,3}},{:gr,{:v,:r1},{:lit,6}}) == true
+		assert Subsumption.subsumes?({:gr,{:v,:r1},{:lit,6}},{:gr,{:v,:r1},{:lit,3}}) == false
+
+		assert Subsumption.subsumes?({:ge,{:v,:r1},{:lit,3}},{:ge,{:v,:r1},{:lit,6}}) == true
+		assert Subsumption.subsumes?({:ge,{:v,:r1},{:lit,6}},{:ge,{:v,:r1},{:lit,6}}) == true
+		assert Subsumption.subsumes?({:ge,{:v,:r1},{:lit,6}},{:ge,{:v,:r1},{:lit,3}}) == false
+
+		assert Subsumption.subsumes?({:lt,{:v,:r1},{:lit,6}},{:lt,{:v,:r1},{:lit,3}}) == true
+		assert Subsumption.subsumes?({:lt,{:v,:r1},{:lit,3}},{:lt,{:v,:r1},{:lit,6}}) == false
+
+		assert Subsumption.subsumes?({:le,{:v,:r1},{:lit,6}},{:le,{:v,:r1},{:lit,3}}) == true
+		assert Subsumption.subsumes?({:le,{:v,:r1},{:lit,6}},{:le,{:v,:r1},{:lit,6}}) == true
+		assert Subsumption.subsumes?({:le,{:v,:r1},{:lit,3}},{:le,{:v,:r1},{:lit,6}}) == false
+
 	end
 
 	test "Get subsumption" do
-		# This is more extensively tested in assignemts and matches, since get subsumption is
+		# This is more extensively tested in assignments and matches, since get subsumption is
 		# identical to match subsumption and implemented as such
 		assert Subsumption.subsumes?({:get,"","",{:v,:i1}},{:get,"key=",";",{:v,:i1}}) == true
 		assert Subsumption.subsumes?({:get,"","",{:v,:i1}},{:get,"key=",";",{:v,:i2}}) == false
@@ -179,6 +202,38 @@ defmodule Epagoge.SubsumptionTest do
 		assert Subsumption.subsumes?({:get,"k=",";",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc"}}) == false
 		assert Subsumption.subsumes?({:get,"k","",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc;"}}) == true
 		assert Subsumption.subsumes?({:get,"","",{:v,:r1}},{:eq,{:v,:r1},{:lit,"k=abc;"}}) == true
+	end
+
+	test "More Subsumption over conjunctions" do
+		e1 = {:eq, {:v, :a}, {:lit, 1}}
+		e2 = {:conj, e1, {:eq, {:v, :b}, {:lit, 2}}}
+		e3 = {:conj, e2, {:eq, {:v, :c}, {:lit, 3}}}
+		e4 = {:conj, e1, {:eq, {:v, :b}, {:lit, 3}}}
+		assert Subsumption.subsumes?(e1,e2) == true
+		assert Subsumption.subsumes?(e2,e3) == true
+		assert Subsumption.subsumes?(e1,e4) == true
+		assert Subsumption.subsumes?(e2,e4) == false
+		assert Subsumption.subsumes?(e4,e3) == false
+
+		e5 = {:gr, {:v, :a}, {:lit, 0}}
+		e6 = {:conj, e5, {:eq, {:v, :b}, {:lit, 2}}}
+
+		assert Subsumption.subsumes?(e5,e1) == true
+		assert Subsumption.subsumes?(e5,e6) == true
+		assert Subsumption.subsumes?(e6,e4) == false
+
+		e7 = {:conj, e5, {:eq, {:v, :b}, {:lit, 3}}}
+
+		assert Subsumption.subsumes?(e5,e7) == true
+		assert Subsumption.subsumes?(e7,e4) == true
+		assert Subsumption.subsumes?(e6,e7) == false
+	end
+
+	test "Subsumption of mismatched equalities" do
+		assert Subsumption.subsumes?({:eq,{:v,:i2},{:lit,"{2,0}"}},{:eq,{:v,:i2},{:lit,"{3,0}"}}) == false
+		# Test list mismatch in one instance but not the other
+		assert Subsumption.subsumes?([{:eq,{:v,:i1},{:lit,"tab"}},{:eq,{:v,:i2},{:lit,"{2,0}"}}],
+																 [{:eq,{:v,:i1},{:lit,"tab"}},{:eq,{:v,:i2},{:lit,"{3,0}"}}]) == false
 	end
 
 end

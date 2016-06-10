@@ -39,8 +39,8 @@ defmodule Epagoge.ILPTest do
 		assert ILP.simplify([{:conj,{:eq,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}}]) == [{:eq,{:v,:i1},{:lit,4}}]
 		assert ILP.simplify([{:eq,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}]) == [{:eq,{:v,:i1},{:lit,4}}]
 		assert ILP.simplify({:conj,{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i1},{:lit,4}}}) == {:eq,{:v,:i1},{:lit,4}}
-		assert ILP.simplify([{:conj,{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}}]) == [{:ge,{:v,:i1},{:lit,4}}]
-		assert ILP.simplify([{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}]) == [{:ge,{:v,:i1},{:lit,4}}]
+		assert ILP.simplify([{:conj,{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}}]) == [{:ge,{:v,:i1},{:lit,6}}]
+		assert ILP.simplify([{:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}]) == [{:ge,{:v,:i1},{:lit,6}}]
 		assert ILP.simplify({:conj,{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i12},{:lit,4}}}) == 
 								 {:conj,{:ge,{:v,:i1},{:lit,4}},{:eq,{:v,:i12},{:lit,4}}}
 	end
@@ -66,13 +66,14 @@ defmodule Epagoge.ILPTest do
 		assert ILP.simplify([{:match,"c","e",{:v,:i1}},{:match,"c","ee",{:v,:i1}}]) == [{:match,"c","e",{:v,:i1}}] 
 	end
 
-	test "Simplifying subsumptive lists" do
-		assert ILP.simplify([
-												 {:assign,:o1,{:lit,"{ok,10}"}},
-												 {:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}
-												 ]) == 
-								 [{:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}]
-	end
+	# Simplification no longer handles subsumption, thats up to you!...
+#	test "Simplifying subsumptive lists" do
+#		assert ILP.simplify([
+#												 {:assign,:o1,{:lit,"{ok,10}"}},
+#												 {:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}
+#												 ]) == 
+#								 [{:assign,:o1,{:concat,{:v,:r2},{:lit,"0}"}}}]
+#	end
 
 	test "Simplifying common examples" do
 		assert ILP.simplify({:eq,{:lit,"hello"},{:lit,"hello"}}) == {:lit,true}
@@ -113,7 +114,86 @@ defmodule Epagoge.ILPTest do
 		assert ILP.simplify({:disj,{:eq,{:lit,"beer"},{:v,:r1}},{:ne,{:v,:r1},{:lit,"beer"}}}) == {:lit, true}
 	end
 
-	test "Some things that have been known to be non-terminal..." do
+	test "Simplifications should still traverse trees" do
+		assert ILP.simplify({:disj, {:nt, {:ne,{:v,:r1},{:lit,1}}}, {:nt, {:ne,{:v,:r1},{:lit,2}}}}) == {:disj,{:eq,{:v,:r1},{:lit,1}},{:eq,{:v,:r1},{:lit,2}}}
+		# The simplifier is not clever enough to realise that these two are contradictory.
+		assert ILP.simplify({:conj,{:nt, {:ne,{:v,:r1},{:lit,1}}},{:disj, {:lit,false}, {:nt, {:ne,{:v,:r1},{:lit,2}}}}}) == {:conj, {:eq, {:v, :r1}, {:lit, 1}}, {:eq, {:v, :r1}, {:lit, 2}}}
+
+	end
+
+	test "Lightweight Implication" do
+		assert ILP.implies?({:lit,false},{:lit,:magic}) == true
+		assert ILP.implies?({:lit,:magic},{:lit,true}) == true
+		assert ILP.implies?({:lit,:magic},{:lit,false}) == false
+		assert ILP.implies?({:lit,true},{:lit,false}) == false
+		assert ILP.implies?({:lit,false},{:lit,false}) == true
+
+		# Instances of values imply ranges
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}}) == true
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}) == false
+
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,2}}) == true
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,4}}) == false
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,6}}) == false
+
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,2}}) == false
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,6}}) == true
+
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,2}}) == false
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,4}}) == false
+		assert ILP.implies?({:eq,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,6}}) == true
+
+		# More restrictive ranges imply less restrictive ranges
+		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}}) == true
+		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}) == false
+
+		assert ILP.implies?({:gr,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,2}}) == true
+		assert ILP.implies?({:gr,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:gr,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,6}}) == false
+
+		assert ILP.implies?({:le,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,2}}) == false
+		assert ILP.implies?({:le,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:le,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,6}}) == true
+
+		assert ILP.implies?({:lt,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,2}}) == false
+		assert ILP.implies?({:lt,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:lt,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,6}}) == true
+		
+		# Some fun combinations of operators
+		assert ILP.implies?({:lt,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,2}}) == false
+		assert ILP.implies?({:lt,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:lt,{:v,:i1},{:lit,4}},{:le,{:v,:i1},{:lit,6}}) == true
+
+		assert ILP.implies?({:gr,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,2}}) == true
+		assert ILP.implies?({:gr,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,4}}) == true
+		assert ILP.implies?({:gr,{:v,:i1},{:lit,4}},{:ge,{:v,:i1},{:lit,6}}) == false
+
+		assert ILP.implies?({:le,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,2}}) == false
+		assert ILP.implies?({:le,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,4}}) == false
+		assert ILP.implies?({:le,{:v,:i1},{:lit,4}},{:lt,{:v,:i1},{:lit,6}}) == true
+
+		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,2}}) == true
+		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,4}}) == false
+		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,6}}) == false
+
+
+		# Subsumption and implication are not inverse!
+		assert ILP.implies?({:eq,{:v,:a},{:lit,4}},{:eq,{:v,:a},{:v,:r1}}) == false
+
+		# Implication is reflexive
+		e1 = {:eq,{:v,:a},{:lit,1}}
+		e2 = {:eq,{:v,:a},{:lit,5}}
+		assert ILP.implies?(e1,e1) == true
+		assert ILP.implies?(e1,e2) == false
+		assert ILP.implies?(e2,e1) == false
+		assert ILP.implies?(e2,e2) == true
+
+	end
+
+	test "Some things that have been known to be non-terminal when the code was broken..." do
 		ILP.simplify({:le,{:v,:i1},{:eq,{:v,:r2},{:v,:i1}}})
 	end
 

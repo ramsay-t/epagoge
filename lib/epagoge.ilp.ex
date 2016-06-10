@@ -32,7 +32,7 @@ defmodule Epagoge.ILP do
 		if Exp.eval(m,Map.put(%{},tgt,s)) do
 			m
 		else
-			#fixme...
+			#FIXME...
 			nil
 		end
 	end
@@ -78,6 +78,7 @@ defmodule Epagoge.ILP do
 	def simplify_step({:conj,{:match,_pre,_suf,tgt}=l,r}) do
 		sr = simplify(r)
 		srlist = conj_to_list(sr)
+		# FIXME this shouldn't depend on subsumption...
 		if Enum.any?(srlist, fn(sre) -> Subs.subsumes?(sre,l) end) do
 			sr
 		else
@@ -122,24 +123,26 @@ defmodule Epagoge.ILP do
 	def simplify_step({:conj,l,{:match,pre,suf,tgt}}) do
 		simplify({:conj,{:match,pre,suf,tgt},l})
 	end
-	def simplify_step({:conj,l,{:conj,_,_}=r}) do
-		sl = simplify(l)
-		sr = simplify(r)
-		srlist = conj_to_list(sr)
-		if Enum.any?(srlist, fn(sre) -> Subs.subsumes?(sre,sl) end) do
-			sr
-		else
-			filtered = List.foldl(srlist,[], 
-														fn(sre,acc) ->  
-																if Subs.subsumes?(sl,sre) do
-																	acc
-																else
-																	acc ++ [sre]
-																end
-														end)
-			list_to_conj([sl | filtered])
-		end
-	end
+
+#	def simplify_step({:conj,l,{:conj,_,_}=r}) do
+#		sl = simplify(l)
+#		sr = simplify(r)
+#		srlist = conj_to_list(sr)
+#		if Enum.any?(srlist, fn(sre) -> Subs.subsumes?(sl,sre) end) do
+#			sr
+#		else
+#			filtered = List.foldl(srlist,[], 
+#														fn(sre,acc) ->  
+#																if Subs.subsumes?(sre,sl) do
+#																	acc
+#																else
+#																	acc ++ [sre]
+#																end
+#														end)
+#			list_to_conj([sl | filtered])
+#		end
+#	end
+
 	# Numerics...
 	def simplify_step({:plus,{:lit,0},x}) do
 		x
@@ -323,36 +326,28 @@ defmodule Epagoge.ILP do
 		simplify({:disj,l,r})
 	end
 
-	# Catch all others
-	def simplify_step({:disj,l,r}=orig) do
+	def simplify_step({:disj,l,r}) do
 		sl = simplify(l)
 		sr = simplify(r)
-		if (sl == inverse(sr)) or (sr == inverse(sl)) do
-			{:lit, true}
-		else
-			orig
+		cond do
+			(sl == inverse(sr)) or (sr == inverse(sl)) -> {:lit, true}
+			sl == {:lit, false} -> sr
+			sr == {:lit, false} -> sl
+			true -> {:disj,sl,sr}
 		end
 	end
 
 	def simplify_step({:conj,l,r}) do
 		sl = simplify(l)
 		sr = simplify(r)
-		if Subs.subsumes?(sl,sr) do 
-			sl
-		else if Subs.subsumes?(sr,sl) do
-					 sr
-				 else
-					 # Some more subtle conjunction and disjunction simplifications 
-					 # These require more computing, so might be best removed for something 
-					 # intense like GP?
-
-					 # Inverse might be easier to calculate one way or the other
-					 if sl == inverse(sr) or sr == inverse(sl) do
-						 {:lit, false}
-					 else
-						 {:conj,sl,sr}
-					 end
-         end
+		cond do
+			sl == sr ->	sl
+			# Inverse might be easier to calculate one way or the other
+			(sl == inverse(sr)) or (sr == inverse(sl)) -> {:lit, false}
+			(sr == {:lit, false}) or (sl == {:lit,false}) -> {:lit, false}
+			implies?(sl,sr) -> sl
+			implies?(sr,sl) -> sr
+			true -> {:conj,sl,sr}
 		end
 	end
 
@@ -432,6 +427,74 @@ defmodule Epagoge.ILP do
 	def inverse(x) do
 		# This is not very imaginative...
 		{:nt, x}
+	end
+
+	@doc """
+  This is a lightweight definition of implication. Where implies?(p,q) returns true it is the case
+  that p -> q, however where implies?(p,q) returns false it *might not be* the case that p -> q.
+  You could say that implies?(p,q) -> (p -> q)...
+  """
+	def implies?({:lit,false},_) do
+		true
+	end
+	def implies?(_,{:lit,true}) do
+		true
+	end
+
+	def implies?(p,p) do
+		true
+	end
+
+	def implies?({:eq,x,{:lit,lval}},{:ge,x,{:lit,rval}}) do
+		lval >= rval
+	end
+	def implies?({:eq,x,{:lit,lval}},{:gr,x,{:lit,rval}}) do
+		lval > rval
+	end
+	def implies?({:eq,x,{:lit,lval}},{:le,x,{:lit,rval}}) do
+		lval <= rval
+	end
+	def implies?({:eq,x,{:lit,lval}},{:lt,x,{:lit,rval}}) do
+		lval < rval
+	end
+
+	def implies?({:ge,x,{:lit,lval}},{:ge,x,{:lit,rval}}) do
+		lval >= rval
+	end
+	def implies?({:gr,x,{:lit,lval}},{:gr,x,{:lit,rval}}) do
+		lval >= rval
+	end
+	def implies?({:ge,x,{:lit,lval}},{:gr,x,{:lit,rval}}) do
+		lval > rval
+	end
+	def implies?({:gr,x,{:lit,lval}},{:ge,x,{:lit,rval}}) do
+		# I don't want to get into a debate about floating point precision...
+		lval >= rval
+	end
+
+	def implies?({:le,x,{:lit,lval}},{:le,x,{:lit,rval}}) do
+		lval <= rval
+	end
+	def implies?({:lt,x,{:lit,lval}},{:lt,x,{:lit,rval}}) do
+		lval <= rval
+	end
+	def implies?({:le,x,{:lit,lval}},{:lt,x,{:lit,rval}}) do
+		lval < rval
+	end
+	def implies?({:lt,x,{:lit,lval}},{:le,x,{:lit,rval}}) do
+		lval <= rval
+	end
+
+	def implies?({:disj,l,r},rr) do
+		implies?(l,rr) and implies?(r,rr)
+	end
+	def implies?({:conj,l,r},rr) do
+		#FIXME this is hard because rr might depend on parts of both...
+		false
+	end
+
+	def implies?(_,_) do
+		false
 	end
 
 end
