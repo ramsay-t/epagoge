@@ -24,6 +24,10 @@ defmodule Epagoge.Subsumption do
 		# Conversly, anything restrictive can't subsume true
 		false
 	end
+	def subsumes?({:lit,true},_) do
+		# true is top of the lattice
+		true
+	end
 	def subsumes?(l,r) do
 		if l == r do
 			# Reflexivity

@@ -4,6 +4,9 @@ defmodule Epagoge.SubsumptionTest do
 
 	test "Subsumption by variable" do
 		assert Subsumption.subsumes?({:v,:r1},{:lit,"coke"}) == true
+		
+		assert Subsumption.subsumes?({:lit,true},{:eq,{:v,:r1},{:lit,4}}) == true
+		assert Subsumption.subsumes?([],[{:eq,{:v,:r1},{:lit,4}}]) == true
 	end
 
 	test "Subsumption of literals" do
