@@ -117,6 +117,7 @@ defmodule Epagoge.ILPTest do
 	test "Simplify identical conj and disj branches" do
 		assert ILP.simplify({:conj,{:eq,{:v,:i1},{:lit,2}},{:eq,{:v,:i1},{:lit,2}}}) == {:eq,{:v,:i1},{:lit,2}}
 		assert ILP.simplify({:disj,{:eq,{:v,:i1},{:lit,2}},{:eq,{:v,:i1},{:lit,2}}}) == {:eq,{:v,:i1},{:lit,2}}
+
 	end
 
 	test "Simplify implicit conj and disj branches" do
@@ -126,6 +127,8 @@ defmodule Epagoge.ILPTest do
 
 	test "Simplifications should still traverse trees" do
 		assert ILP.simplify({:disj, {:nt, {:ne,{:v,:r1},{:lit,1}}}, {:nt, {:ne,{:v,:r1},{:lit,2}}}}) == {:disj,{:eq,{:v,:r1},{:lit,1}},{:eq,{:v,:r1},{:lit,2}}}
+		assert ILP.simplify({:conj,{:eq,{:v,:i1},{:lit,2}},{:conj,{:eq,{:v,:i1},{:lit,2}},{:eq,{:v,:i2},{:lit,77}}}}) == {:conj,{:eq,{:v,:i1},{:lit,2}},{:eq,{:v,:i2},{:lit,77}}}
+
 		# The simplifier is not clever enough to realise that these two are contradictory.
 		assert ILP.simplify({:conj,{:nt, {:ne,{:v,:r1},{:lit,1}}},{:disj, {:lit,false}, {:nt, {:ne,{:v,:r1},{:lit,2}}}}}) == {:conj, {:eq, {:v, :r1}, {:lit, 1}}, {:eq, {:v, :r1}, {:lit, 2}}}
 

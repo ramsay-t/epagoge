@@ -124,24 +124,21 @@ defmodule Epagoge.ILP do
 		simplify({:conj,{:match,pre,suf,tgt},l})
 	end
 
-#	def simplify_step({:conj,l,{:conj,_,_}=r}) do
-#		sl = simplify(l)
-#		sr = simplify(r)
-#		srlist = conj_to_list(sr)
-#		if Enum.any?(srlist, fn(sre) -> Subs.subsumes?(sl,sre) end) do
-#			sr
-#		else
-#			filtered = List.foldl(srlist,[], 
-#														fn(sre,acc) ->  
-#																if Subs.subsumes?(sre,sl) do
-#																	acc
-#																else
-#																	acc ++ [sre]
-#																end
-#														end)
-#			list_to_conj([sl | filtered])
-#		end
-#	end
+	def simplify_step({:conj,l,{:conj,_,_}=r}) do
+		sl = simplify(l)
+		sr = simplify(r)
+		srlist = conj_to_list(sr)
+		filterlist = Enum.filter(srlist,fn(o) -> not implies?(sl,o) end)
+		if Enum.any?(filterlist, fn(o) -> implies?(o,sl) end) do
+			list_to_conj(filterlist)
+		else
+			list_to_conj([sl|filterlist])
+		end
+	end
+	def simplify_step({:conj,{:conj,_,_}=l,r}) do
+		# Use the other pattern
+		simplify_step({:conj,r,l})
+	end
 
 	# Numerics...
 	def simplify_step({:plus,{:lit,0},x}) do
