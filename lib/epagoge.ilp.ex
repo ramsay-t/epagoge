@@ -495,8 +495,20 @@ defmodule Epagoge.ILP do
 		false
 	end
 
-	def implies?(_,_) do
-		false
+	# Being equal to one thing implies that you aren't equal to anything else
+	def implies?({:eq,l,r},{:ne,l,rr}) do
+		r != rr
+	end
+
+	# Check whether the rules might match with some simplification
+	def implies?(l,r) do
+		sl = simplify(l)
+		sr = simplify(r)
+		if (l == sl) and (r == sr) do
+			false
+		else
+			implies?(sl,sr)
+		end
 	end
 
 end

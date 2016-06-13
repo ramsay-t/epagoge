@@ -192,7 +192,6 @@ defmodule Epagoge.ILPTest do
 		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,4}}) == false
 		assert ILP.implies?({:ge,{:v,:i1},{:lit,4}},{:gr,{:v,:i1},{:lit,6}}) == false
 
-
 		# Subsumption and implication are not inverse!
 		assert ILP.implies?({:eq,{:v,:a},{:lit,4}},{:eq,{:v,:a},{:v,:r1}}) == false
 
@@ -203,6 +202,10 @@ defmodule Epagoge.ILPTest do
 		assert ILP.implies?(e1,e2) == false
 		assert ILP.implies?(e2,e1) == false
 		assert ILP.implies?(e2,e2) == true
+
+		# Equality and inequality
+		assert ILP.implies?(e1,{:nt, e2}) == true
+		assert ILP.implies?({:nt, e1},e2) == false
 
 	end
 
