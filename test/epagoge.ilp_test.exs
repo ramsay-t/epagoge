@@ -206,6 +206,7 @@ defmodule Epagoge.ILPTest do
 		# Equality and inequality
 		assert ILP.implies?(e1,{:nt, e2}) == true
 		assert ILP.implies?({:nt, e1},e2) == false
+		assert ILP.implies?(e1,{:ne,{:v,:b},{:lit,2}}) == false
 
 	end
 
