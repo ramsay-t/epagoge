@@ -159,6 +159,16 @@ defmodule Epagoge.GeneticProgrammingTest do
 		check(exp,:possible,&simplenumclassifier/1)
 	end
 
+	defp dset5() do
+		[%{i1: "50", rlasto1: "50", possible: true},
+		 %{i1: "50", possible: false}
+		]
+	end
+
+	test "Distinguish using something only sometimes defined" do
+		exp = GenProg.infer(dset5, :possible, [{:pop_size,50},{:thres,1.0}, {:monitor,:any}])
+		assert (exp == {:eq,{:v,:rlasto1},{:lit,"50"}}) or (exp == {:eq,{:v,:rlasto1},{:v,:i1}})
+	end
 
 #	@tag timeout: 300000
 #	test "Hard boolean decision" do

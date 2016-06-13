@@ -139,20 +139,20 @@ defmodule Epagoge.GeneticProgramming do
 	defp get_v_names([]) do
 		[]
 	end
-	defp get_v_names([data | set]) do
-		get_v_names(set,Map.keys(data))
+	defp get_v_names(set) do
+		get_v_names(set,[])
 	end
 	defp get_v_names([],names) do
 		names
 	end
 	defp get_v_names([data | more], names) do
 		minnames = List.foldl(Map.keys(data),
-															[],
+															names,
 															fn(n,acc) ->
 																	# We can only compute from inputs and registers
 																	nstring = to_string(n)
 																	if String.starts_with?(nstring,"r") or String.starts_with?(nstring,"i") do
-																		if Enum.any?(names, fn(nn) -> nn == n end) do
+																		if not Enum.any?(acc, fn(nn) -> nn == n end) do
 																			[n | acc]
 																		else
 																			acc
